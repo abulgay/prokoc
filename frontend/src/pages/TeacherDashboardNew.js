@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import WeeklyScheduleManager from '../components/teacher/WeeklyScheduleManager';
 import ResourceManager from '../components/teacher/ResourceManager';
 import QuestionEntryForm from '../components/teacher/QuestionEntryForm';
+import ExamAnalysisManager from '../components/teacher/ExamAnalysisManager';
 
 const TeacherDashboardNew = () => {
   const { user, logout } = useAuth();
