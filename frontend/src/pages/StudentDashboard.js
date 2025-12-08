@@ -408,37 +408,6 @@ const StudentDashboard = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="schedule">
-                <Card className="glassmorphism p-6">
-                  <h2 className="text-xl font-bold text-slate-50 mb-6">Haftalık Ders Programım</h2>
-                  {schedule.length === 0 ? (
-                    <p className="text-slate-400 text-center py-8">Henüz program oluşturulmamış</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {schedule.sort((a, b) => a.day_of_week - b.day_of_week).map((item, idx) => {
-                        const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-                        return (
-                          <div key={idx} className="glassmorphism p-5 rounded-lg card-hover" data-testid={`schedule-${idx}`}>
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="p-2 bg-indigo-600 rounded-lg">
-                                <BookOpen className="w-5 h-5 text-white" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-slate-50">{dayNames[item.day_of_week]}</h3>
-                                <p className="text-xs text-slate-400 font-mono">{item.start_time} - {item.end_time}</p>
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-indigo-400">{item.subject}</p>
-                              <p className="text-sm text-slate-300">{item.topic}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </Card>
-              </TabsContent>
             </Tabs>
           </>
         )}
