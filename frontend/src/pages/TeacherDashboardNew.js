@@ -190,6 +190,10 @@ const TeacherDashboardNew = () => {
               <QuestionEntryForm studentId={selectedStudent.id} />
             </TabsContent>
 
+            <TabsContent value="exam-analysis">
+              <ExamAnalysisManager studentId={selectedStudent.id} />
+            </TabsContent>
+
             <TabsContent value="resources">
               <ResourceManager studentId={selectedStudent.id} />
             </TabsContent>
