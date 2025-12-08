@@ -67,6 +67,15 @@ function AppRoutes() {
         }
       />
       
+      <Route
+        path="/statistics"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+            <StatisticsPage />
+          </ProtectedRoute>
+        }
+      />
+      
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );
