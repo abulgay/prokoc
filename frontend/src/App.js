@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
+import StatisticsPage from './pages/StatisticsPage';
 import './App.css';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
