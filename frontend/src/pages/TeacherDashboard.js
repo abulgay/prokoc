@@ -154,6 +154,18 @@ const TeacherDashboard = () => {
                 <BookOpen className="w-4 h-4 mr-2" />
                 Soru Girişi
               </TabsTrigger>
+              <TabsTrigger value="assignments" data-testid="tab-assignments">
+                <ClipboardList className="w-4 h-4 mr-2" />
+                Ödevler
+              </TabsTrigger>
+              <TabsTrigger value="resources" data-testid="tab-resources">
+                <FileText className="w-4 h-4 mr-2" />
+                Kaynak Takibi
+              </TabsTrigger>
+              <TabsTrigger value="schedule" data-testid="tab-schedule">
+                <Calendar className="w-4 h-4 mr-2" />
+                Ders Programı
+              </TabsTrigger>
               <TabsTrigger value="students" data-testid="tab-students">
                 <Users className="w-4 h-4 mr-2" />
                 Öğrencilerim
