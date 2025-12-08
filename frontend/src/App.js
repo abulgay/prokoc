@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { StudentSelectionProvider } from './context/StudentSelectionContext';
 import { Toaster } from './components/ui/sonner';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
-import TeacherDashboard from './pages/TeacherDashboard';
+import TeacherDashboardNew from './pages/TeacherDashboardNew';
 import StudentDashboard from './pages/StudentDashboard';
 import StatisticsPage from './pages/StatisticsPage';
 import './App.css';
