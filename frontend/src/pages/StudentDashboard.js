@@ -14,6 +14,8 @@ const StudentDashboard = () => {
   const [teacher, setTeacher] = useState(null);
   const [questionEntries, setQuestionEntries] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
