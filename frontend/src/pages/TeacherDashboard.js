@@ -29,6 +29,28 @@ const TeacherDashboard = () => {
     notes: ''
   });
 
+  const [assignmentForm, setAssignmentForm] = useState({
+    title: '',
+    description: '',
+    subject: '',
+    due_date: ''
+  });
+
+  const [resourceForm, setResourceForm] = useState({
+    resource_name: '',
+    subject: '',
+    topic: '',
+    status: 'in_progress'
+  });
+
+  const [scheduleForm, setScheduleForm] = useState({
+    day_of_week: '1',
+    start_time: '',
+    end_time: '',
+    subject: '',
+    topic: ''
+  });
+
   useEffect(() => {
     if (user?.role !== 'teacher') {
       navigate('/login');
