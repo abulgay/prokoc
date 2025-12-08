@@ -388,6 +388,143 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="subjects">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Add Subject */}
+              <Card className="glassmorphism p-6">
+                <h2 className="text-xl font-bold text-slate-50 mb-6">Ders Ekle</h2>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">Ders Adı</label>
+                    <Input
+                      value={newSubject.name}
+                      onChange={(e) => setNewSubject({ ...newSubject, name: e.target.value })}
+                      placeholder="Örn: Matematik"
+                      className="bg-slate-900 border-slate-800 text-slate-100"
+                      data-testid="subject-name-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">Sınav Türü</label>
+                    <Select
+                      value={newSubject.exam_type}
+                      onValueChange={(value) => setNewSubject({ ...newSubject, exam_type: value })}
+                    >
+                      <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-800">
+                        <SelectItem value="TYT">TYT</SelectItem>
+                        <SelectItem value="AYT">AYT</SelectItem>
+                        <SelectItem value="LGS">LGS</SelectItem>
+                        <SelectItem value="KPSS">KPSS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={handleAddSubject}
+                    className="w-full bg-green-600 hover:bg-green-500"
+                    data-testid="add-subject-button"
+                  >
+                    Ders Ekle
+                  </Button>
+                </div>
+
+                {/* Subjects List */}
+                <div className="mt-6 space-y-2">
+                  <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Mevcut Dersler</h3>
+                  {subjects.length === 0 ? (
+                    <p className="text-slate-500 text-sm">Henüz ders eklenmedi</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {subjects.map((subject) => (
+                        <div
+                          key={subject.id}
+                          className="flex items-center justify-between p-3 bg-slate-900/50 rounded border border-slate-800"
+                        >
+                          <span className="text-slate-200">{subject.name}</span>
+                          <span className="px-2 py-1 bg-indigo-600/20 text-indigo-400 text-xs rounded">
+                            {subject.exam_type}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Add Topic */}
+              <Card className="glassmorphism p-6">
+                <h2 className="text-xl font-bold text-slate-50 mb-6">Konu Ekle</h2>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">Ders Seç</label>
+                    <Select
+                      value={selectedSubjectForTopic}
+                      onValueChange={(value) => {
+                        setSelectedSubjectForTopic(value);
+                        loadTopicsForSubject(value);
+                      }}
+                    >
+                      <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                        <SelectValue placeholder="Ders seçin" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-800">
+                        {subjects.map((subject) => (
+                          <SelectItem key={subject.id} value={subject.id}>
+                            {subject.name} ({subject.exam_type})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">Konu Adı</label>
+                    <Input
+                      value={newTopicName}
+                      onChange={(e) => setNewTopicName(e.target.value)}
+                      placeholder="Örn: İkinci Dereceden Denklemler"
+                      className="bg-slate-900 border-slate-800 text-slate-100"
+                      disabled={!selectedSubjectForTopic}
+                      data-testid="topic-name-input"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleAddTopic}
+                    disabled={!selectedSubjectForTopic}
+                    className="w-full bg-green-600 hover:bg-green-500"
+                    data-testid="add-topic-button"
+                  >
+                    Konu Ekle
+                  </Button>
+                </div>
+
+                {/* Topics List */}
+                {selectedSubjectForTopic && subjectTopics[selectedSubjectForTopic] && (
+                  <div className="mt-6 space-y-2">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                      {subjects.find(s => s.id === selectedSubjectForTopic)?.name} Konuları
+                    </h3>
+                    {subjectTopics[selectedSubjectForTopic].length === 0 ? (
+                      <p className="text-slate-500 text-sm">Henüz konu eklenmedi</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {subjectTopics[selectedSubjectForTopic].map((topic) => (
+                          <div
+                            key={topic.id}
+                            className="p-2 bg-slate-900/50 rounded border border-slate-800 text-slate-200 text-sm"
+                          >
+                            {topic.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="reports">
             <Card className="glassmorphism p-6">
               <h2 className="text-xl font-bold text-slate-50 mb-4">Çalışma Raporları</h2>
