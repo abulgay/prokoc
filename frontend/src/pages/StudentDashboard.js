@@ -172,10 +172,10 @@ const StudentDashboard = () => {
             <Tabs defaultValue="teacher" className="space-y-6">
               <TabsList className="bg-slate-900 border border-slate-800">
                 <TabsTrigger value="teacher" data-testid="tab-teacher">Öğretmenim</TabsTrigger>
+                <TabsTrigger value="program" data-testid="tab-program">Haftalık Programım</TabsTrigger>
                 <TabsTrigger value="entries" data-testid="tab-entries">Çözümlerim</TabsTrigger>
                 <TabsTrigger value="assignments" data-testid="tab-assignments">Ödevlerim</TabsTrigger>
                 <TabsTrigger value="resources" data-testid="tab-resources">Kaynaklarım</TabsTrigger>
-                <TabsTrigger value="schedule" data-testid="tab-schedule">Programım</TabsTrigger>
               </TabsList>
 
               <TabsContent value="teacher">
