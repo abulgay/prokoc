@@ -591,6 +591,45 @@ async def get_student_exam_analyses(student_id: str, payload: dict = Depends(ver
     analyses = await db.exam_analyses.find({"student_id": student_id, "teacher_id": payload['user_id']}, {"_id": 0}).to_list(1000)
     return analyses
 
+@api_router.get("/teacher/exam-analysis-summary/{student_id}")
+async def get_exam_analysis_summary(student_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    analyses = await db.exam_analyses.find({"student_id": student_id, "teacher_id": payload['user_id']}, {"_id": 0}).to_list(1000)
+    
+    if not analyses:
+        return {"analyses": [], "summary": {}}
+    
+    summary = {
+        "total_exams": len(analyses),
+        "average_net": sum([a['total_net'] for a in analyses]) / len(analyses),
+        "best_exam": max(analyses, key=lambda x: x['total_net']),
+        "worst_exam": min(analyses, key=lambda x: x['total_net']),
+        "subject_performance": {}
+    }
+    
+    for analysis in analyses:
+        for subject in analysis['subjects']:
+            subject_name = subject['name']
+            if subject_name not in summary['subject_performance']:
+                summary['subject_performance'][subject_name] = {
+                    'total_net': 0,
+                    'count': 0,
+                    'total_correct': 0,
+                    'total_wrong': 0
+                }
+            summary['subject_performance'][subject_name]['total_net'] += subject.get('net', 0)
+            summary['subject_performance'][subject_name]['count'] += 1
+            summary['subject_performance'][subject_name]['total_correct'] += subject.get('correct', 0)
+            summary['subject_performance'][subject_name]['total_wrong'] += subject.get('wrong', 0)
+    
+    for subject_name in summary['subject_performance']:
+        perf = summary['subject_performance'][subject_name]
+        perf['average_net'] = perf['total_net'] / perf['count'] if perf['count'] > 0 else 0
+    
+    return {"analyses": analyses, "summary": summary}
+
 @api_router.post("/teacher/resource-tracking")
 async def create_resource_tracking(resource_data: ResourceTrackingCreate, payload: dict = Depends(verify_token)):
     if payload['role'] != UserRole.TEACHER.value:
