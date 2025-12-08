@@ -205,6 +205,71 @@ class Notification(BaseModel):
     read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Subject(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    exam_type: ExamType
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SubjectCreate(BaseModel):
+    name: str
+    exam_type: ExamType
+
+class Topic(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    subject_id: str
+    name: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class TopicCreate(BaseModel):
+    subject_id: str
+    name: str
+
+class WeeklySchedule(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    teacher_id: str
+    week_start_date: datetime
+    week_end_date: datetime
+    schedule_items: List[Dict[str, Any]]
+    is_suggested: bool = False
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WeeklyScheduleCreate(BaseModel):
+    student_id: str
+    week_start_date: datetime
+    schedule_items: List[Dict[str, Any]]
+
+class ScheduleItem(BaseModel):
+    day: int
+    start_time: str
+    end_time: str
+    subject: str
+    topic: Optional[str] = None
+    resource: Optional[str] = None
+    activity_type: str
+    notes: Optional[str] = None
+
+class ResourceWithTopics(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    teacher_id: str
+    resource_name: str
+    subject: str
+    topics: List[Dict[str, Any]]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ResourceWithTopicsCreate(BaseModel):
+    student_id: str
+    resource_name: str
+    subject: str
+    topics: List[Dict[str, Any]]
+
 # Utility Functions
 def create_access_token(data: dict):
     to_encode = data.copy()
