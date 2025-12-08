@@ -262,6 +262,69 @@ const StudentDashboard = () => {
                   )}
                 </Card>
               </TabsContent>
+
+              <TabsContent value="resources">
+                <Card className="glassmorphism p-6">
+                  <h2 className="text-xl font-bold text-slate-50 mb-6">Kaynak Takibi</h2>
+                  {resources.length === 0 ? (
+                    <p className="text-slate-400 text-center py-8">Henüz kaynak kaydı yok</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {resources.map((resource, idx) => (
+                        <div key={idx} className="glassmorphism p-6 rounded-lg" data-testid={`resource-${idx}`}>
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h3 className="text-lg font-semibold text-slate-50 mb-1">{resource.resource_name}</h3>
+                              <p className="text-sm text-slate-400">{resource.subject} - {resource.topic}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              resource.status === 'completed' 
+                                ? 'bg-green-500/20 text-green-400' 
+                                : resource.status === 'in_progress'
+                                ? 'bg-amber-500/20 text-amber-400'
+                                : 'bg-slate-500/20 text-slate-400'
+                            }`}>
+                              {resource.status === 'completed' ? 'Tamamlandı' : resource.status === 'in_progress' ? 'Devam Ediyor' : 'Başlanmadı'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="schedule">
+                <Card className="glassmorphism p-6">
+                  <h2 className="text-xl font-bold text-slate-50 mb-6">Haftalık Ders Programım</h2>
+                  {schedule.length === 0 ? (
+                    <p className="text-slate-400 text-center py-8">Henüz program oluşturulmamış</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {schedule.sort((a, b) => a.day_of_week - b.day_of_week).map((item, idx) => {
+                        const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                        return (
+                          <div key={idx} className="glassmorphism p-5 rounded-lg card-hover" data-testid={`schedule-${idx}`}>
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="p-2 bg-indigo-600 rounded-lg">
+                                <BookOpen className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-slate-50">{dayNames[item.day_of_week]}</h3>
+                                <p className="text-xs text-slate-400 font-mono">{item.start_time} - {item.end_time}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-indigo-400">{item.subject}</p>
+                              <p className="text-sm text-slate-300">{item.topic}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
             </Tabs>
           </>
         )}
