@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
 import {
   Table,
   TableBody,
