@@ -5,6 +5,8 @@ import { Toaster } from './components/ui/sonner';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
+import StudentDashboard from './pages/StudentDashboard';
 import './App.css';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
