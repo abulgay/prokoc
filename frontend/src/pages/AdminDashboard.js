@@ -55,13 +55,14 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [pendingRes, teachersRes, studentsRes, matchesRes, reportsRes, notifsRes] = await Promise.all([
+      const [pendingRes, teachersRes, studentsRes, matchesRes, reportsRes, notifsRes, subjectsRes] = await Promise.all([
         api.get('/admin/pending-users'),
         api.get('/admin/teachers'),
         api.get('/admin/students'),
         api.get('/admin/matches'),
         api.get('/admin/reports'),
-        api.get('/notifications')
+        api.get('/notifications'),
+        api.get('/admin/subjects')
       ]);
       
       setPendingUsers(pendingRes.data);
@@ -70,10 +71,55 @@ const AdminDashboard = () => {
       setMatches(matchesRes.data);
       setReports(reportsRes.data);
       setNotifications(notifsRes.data);
+      setSubjects(subjectsRes.data);
     } catch (error) {
       toast.error('Veri yüklenirken hata oluştu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddSubject = async () => {
+    if (!newSubject.name) {
+      toast.error('Lütfen ders adı girin');
+      return;
+    }
+
+    try {
+      await api.post('/admin/subjects', newSubject);
+      toast.success('Ders eklendi');
+      setNewSubject({ name: '', exam_type: 'TYT' });
+      fetchData();
+    } catch (error) {
+      toast.error('Ders eklenemedi');
+    }
+  };
+
+  const handleAddTopic = async () => {
+    if (!selectedSubjectForTopic || !newTopicName) {
+      toast.error('Lütfen ders seçin ve konu adı girin');
+      return;
+    }
+
+    try {
+      await api.post('/admin/topics', {
+        subject_id: selectedSubjectForTopic,
+        name: newTopicName
+      });
+      toast.success('Konu eklendi');
+      setNewTopicName('');
+      loadTopicsForSubject(selectedSubjectForTopic);
+    } catch (error) {
+      toast.error('Konu eklenemedi');
+    }
+  };
+
+  const loadTopicsForSubject = async (subjectId) => {
+    try {
+      const response = await api.get(`/admin/topics/${subjectId}`);
+      setSubjectTopics({ ...subjectTopics, [subjectId]: response.data });
+    } catch (error) {
+      console.error('Topics load error:', error);
     }
   };
 
