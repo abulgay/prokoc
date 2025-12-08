@@ -101,10 +101,79 @@ const TeacherDashboard = () => {
     }
   };
 
+  const handleAssignmentSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedStudent) {
+      toast.error('Lütfen öğrenci seçin');
+      return;
+    }
+
+    try {
+      await api.post('/teacher/assignment', {
+        ...assignmentForm,
+        student_id: selectedStudent,
+        due_date: new Date(assignmentForm.due_date).toISOString()
+      });
+      toast.success('Ödev oluşturuldu');
+      setAssignmentForm({ title: '', description: '', subject: '', due_date: '' });
+    } catch (error) {
+      toast.error('Ödev oluşturulamadı');
+    }
+  };
+
+  const handleResourceSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedStudent) {
+      toast.error('Lütfen öğrenci seçin');
+      return;
+    }
+
+    try {
+      await api.post('/teacher/resource-tracking', {
+        ...resourceForm,
+        student_id: selectedStudent
+      });
+      toast.success('Kaynak eklendi');
+      setResourceForm({ resource_name: '', subject: '', topic: '', status: 'in_progress' });
+    } catch (error) {
+      toast.error('Kaynak eklenemedi');
+    }
+  };
+
+  const handleScheduleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedStudent) {
+      toast.error('Lütfen öğrenci seçin');
+      return;
+    }
+
+    try {
+      await api.post('/teacher/study-schedule', {
+        ...scheduleForm,
+        student_id: selectedStudent,
+        day_of_week: parseInt(scheduleForm.day_of_week)
+      });
+      toast.success('Ders programı eklendi');
+      setScheduleForm({ day_of_week: '1', start_time: '', end_time: '', subject: '', topic: '' });
+    } catch (error) {
+      toast.error('Program eklenemedi');
+    }
+  };
+
   const subjects = {
     TYT: ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilimler'],
     AYT: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Tarih', 'Coğrafya']
   };
+
+  const daysOfWeek = [
+    { value: '1', label: 'Pazartesi' },
+    { value: '2', label: 'Salı' },
+    { value: '3', label: 'Çarşamba' },
+    { value: '4', label: 'Perşembe' },
+    { value: '5', label: 'Cuma' },
+    { value: '6', label: 'Cumartesi' },
+    { value: '0', label: 'Pazar' }
+  ];
 
   if (loading) {
     return (
