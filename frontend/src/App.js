@@ -52,9 +52,7 @@ function AppRoutes() {
         path="/teacher/*"
         element={
           <ProtectedRoute allowedRoles={['teacher']}>
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-              <div className="text-slate-400">Öğretmen Dashboard (Yakında)</div>
-            </div>
+            <TeacherDashboard />
           </ProtectedRoute>
         }
       />
@@ -63,9 +61,7 @@ function AppRoutes() {
         path="/student/*"
         element={
           <ProtectedRoute allowedRoles={['student']}>
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-              <div className="text-slate-400">Öğrenci Dashboard (Yakında)</div>
-            </div>
+            <StudentDashboard />
           </ProtectedRoute>
         }
       />
