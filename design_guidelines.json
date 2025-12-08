@@ -1,0 +1,152 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "mission": "Create a 'Dark Academia Tech' coaching platform that feels like a Mission Control center for academic success. Serious, high-contrast, and professional.",
+    "principles": [
+      "Fusion: Mix 'Swiss Poster' precision with 'Control Room' density.",
+      "Emotion: Confidence, Focus, Progress.",
+      "Content: Data is the hero. Charts and numbers must pop against the dark background.",
+      "Contrast: High contrast text for readability in dark mode. Neon accents for status."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Outfit",
+        "weights": ["400", "600", "700"],
+        "usage": "Page titles, Section headers, Big metrics"
+      },
+      "body": {
+        "family": "Inter",
+        "weights": ["300", "400", "500"],
+        "usage": "Paragraphs, Labels, Form inputs"
+      },
+      "mono": {
+        "family": "JetBrains Mono",
+        "weights": ["400"],
+        "usage": "Net scores, Dates, IDs, Tabular data"
+      }
+    },
+    "rules": [
+      "Headings must be tight: tracking-tight.",
+      "Overlines (small labels) must be wide: tracking-widest uppercase text-xs.",
+      "Never use pure white (#FFFFFF) for text. Use slate-50 or slate-100."
+    ]
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": {
+        "default": "#020617", 
+        "paper": "#0f172a",
+        "subtle": "#1e293b"
+      },
+      "primary": {
+        "main": "#6366f1",
+        "hover": "#4f46e5",
+        "foreground": "#ffffff"
+      },
+      "accent": {
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#0ea5e9"
+      },
+      "border": {
+        "default": "#1e293b",
+        "active": "#334155"
+      },
+      "text": {
+        "primary": "#f8fafc",
+        "secondary": "#94a3b8",
+        "muted": "#64748b"
+      }
+    },
+    "gradients": {
+      "hero": "linear-gradient(to bottom right, #0f172a, #020617)",
+      "glow": "radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%)"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "enabled": true,
+      "classes": "bg-slate-950/50 backdrop-blur-xl border border-slate-800/50 shadow-2xl"
+    },
+    "borders": {
+      "style": "1px solid",
+      "color": "border-slate-800",
+      "radius": "rounded-xl"
+    },
+    "shadows": {
+      "card": "0 0 0 1px rgba(255,255,255,0.05), 0 4px 6px -1px rgba(0,0,0,0.5)",
+      "glow": "0 0 20px -5px rgba(99, 102, 241, 0.3)"
+    }
+  },
+  "images": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1762279389006-43963a0cee55?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Abstract digital landscape",
+      "usage": "Landing page hero background with low opacity overlay"
+    },
+    "student_focus": {
+      "url": "https://images.unsplash.com/photo-1688829388910-8c43a88d85a2?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Student studying in library",
+      "usage": "Student dashboard welcome or login side image"
+    },
+    "teacher_professional": {
+      "url": "https://images.unsplash.com/photo-1732305422171-70176afa837c?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Teacher with laptop",
+      "usage": "Teacher dashboard or 'For Teachers' section"
+    },
+    "data_abstract": {
+      "url": "https://images.unsplash.com/photo-1760112783563-514867b4c2ed?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Neon data lines",
+      "usage": "Statistics page header background"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300",
+      "secondary": "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700",
+      "ghost": "hover:bg-slate-800/50 text-slate-400 hover:text-slate-100"
+    },
+    "cards": {
+      "base": "bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-xl p-6",
+      "hover": "hover:border-indigo-500/30 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.2)] transition-all duration-300"
+    },
+    "inputs": {
+      "base": "bg-slate-950 border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder:text-slate-600"
+    },
+    "charts": {
+      "library": "recharts",
+      "style": "Use dark tooltips (bg-slate-900 border-slate-800). Lines should be thin (strokeWidth={2}) and use neon colors (indigo, emerald, amber)."
+    }
+  },
+  "layouts": {
+    "dashboard": {
+      "structure": "Sidebar (fixed left) + Topbar (sticky) + Main Content (scrollable)",
+      "grid": "grid-cols-1 md:grid-cols-12 gap-6",
+      "spacing": "p-6 md:p-8"
+    },
+    "landing": {
+      "structure": "Hero (Full height) -> Features (Bento Grid) -> Testimonials -> CTA",
+      "spacing": "gap-24 py-24"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Ensure 'lucide-react', 'recharts', 'framer-motion', 'clsx', 'tailwind-merge' are installed.",
+    "2. THEME: Force dark mode in tailwind.config.js or apply 'dark' class to html/body.",
+    "3. FONTS: Import 'Outfit', 'Inter', and 'JetBrains Mono' from Google Fonts in index.css.",
+    "4. COMPONENTS: Use Shadcn UI components but OVERRIDE the default styles with the 'glassmorphism' classes defined above.",
+    "5. CHARTS: When building the Statistics page, use Recharts. Ensure the X/Y axis lines are subtle (#334155) and the data lines are vibrant.",
+    "6. PDF: Use 'jspdf' and 'html2canvas' for the PDF export functionality.",
+    "7. NOTIFICATIONS: Use 'sonner' for toast notifications.",
+    "8. TESTING: Add data-testid to all interactive elements (buttons, inputs, cards)."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop': No generic gradients. No 'Inter' for headings.",
+    "Micro-interactions: Add hover states to everything. Cards should lift slightly.",
+    "Empty States: Never leave a dashboard empty. Show 'No students assigned' with a helpful illustration or icon.",
+    "Data Density: This is a coaching tool. Don't be afraid of density, but keep it organized with whitespace."
+  ]
+}
