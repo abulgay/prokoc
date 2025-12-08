@@ -193,6 +193,115 @@ const StudentDashboard = () => {
                 </Card>
               </TabsContent>
 
+              <TabsContent value="program">
+                <Card className="glassmorphism p-6">
+                  <div className="mb-6">
+                    <h2 className="text-xl font-bold text-slate-50 mb-2">Haftalık Çalışma Programım</h2>
+                    {selectedWeek && (
+                      <p className="text-slate-400">
+                        {new Date(selectedWeek.week_start_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })} - {' '}
+                        {new Date(selectedWeek.week_end_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
+
+                  {weeklySchedules.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Calendar className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-400">Henüz haftalık program oluşturulmamış</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Week Selector */}
+                      {weeklySchedules.length > 1 && (
+                        <div className="mb-6 flex gap-2 flex-wrap">
+                          {weeklySchedules.map((week, idx) => (
+                            <Button
+                              key={idx}
+                              onClick={() => setSelectedWeek(week)}
+                              variant={selectedWeek?.id === week.id ? 'default' : 'outline'}
+                              size="sm"
+                              className={selectedWeek?.id === week.id ? 'bg-indigo-600' : 'border-slate-700 text-slate-300'}
+                            >
+                              {new Date(week.week_start_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Program Table */}
+                      {selectedWeek && (
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="border-b-2 border-slate-700">
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Gün</th>
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Saat</th>
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Ders</th>
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Konu</th>
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Kaynak</th>
+                                <th className="text-left py-3 px-4 text-slate-300 font-semibold">Aktivite</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(() => {
+                                const daysOfWeek = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                                const itemsByDay = {};
+                                [1, 2, 3, 4, 5, 6, 0].forEach(day => {
+                                  itemsByDay[day] = selectedWeek.schedule_items.filter(item => item.day === day)
+                                    .sort((a, b) => a.start_time.localeCompare(b.start_time));
+                                });
+                                
+                                return [1, 2, 3, 4, 5, 6, 0].map(day => (
+                                  <React.Fragment key={day}>
+                                    {itemsByDay[day].length > 0 ? (
+                                      itemsByDay[day].map((item, idx) => (
+                                        <tr key={`${day}-${idx}`} className="border-b border-slate-800/50 hover:bg-slate-900/30">
+                                          {idx === 0 && (
+                                            <td rowSpan={itemsByDay[day].length} className="py-4 px-4 font-medium text-slate-100 border-r border-slate-800">
+                                              {daysOfWeek[day]}
+                                            </td>
+                                          )}
+                                          <td className="py-3 px-4 text-slate-300 font-mono text-sm">
+                                            {item.start_time} - {item.end_time}
+                                          </td>
+                                          <td className="py-3 px-4 text-slate-100">{item.subject}</td>
+                                          <td className="py-3 px-4 text-slate-300 text-sm">{item.topic || '-'}</td>
+                                          <td className="py-3 px-4 text-slate-300 text-sm">{item.resource || '-'}</td>
+                                          <td className="py-3 px-4">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                              item.activity_type === 'break' ? 'bg-amber-500/20 text-amber-400' :
+                                              item.activity_type === 'free' ? 'bg-slate-500/20 text-slate-400' :
+                                              item.activity_type === 'test' ? 'bg-red-500/20 text-red-400' :
+                                              'bg-indigo-500/20 text-indigo-400'
+                                            }`}>
+                                              {item.activity_type === 'study' ? 'Konu Çalışma' :
+                                               item.activity_type === 'practice' ? 'Soru Çözme' :
+                                               item.activity_type === 'test' ? 'Deneme' :
+                                               item.activity_type === 'review' ? 'Tekrar' :
+                                               item.activity_type === 'break' ? 'Dinlenme' : 'Boş Zaman'}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      <tr className="border-b border-slate-800/50">
+                                        <td className="py-4 px-4 font-medium text-slate-100 border-r border-slate-800">{daysOfWeek[day]}</td>
+                                        <td colSpan={5} className="py-4 px-4 text-center text-slate-500 italic">Boş gün</td>
+                                      </tr>
+                                    )}
+                                  </React.Fragment>
+                                ));
+                              })()}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </Card>
+              </TabsContent>
+
               <TabsContent value="entries">
                 <Card className="glassmorphism p-6">
                   <h2 className="text-xl font-bold text-slate-50 mb-6">Son Çözümlerim</h2>
