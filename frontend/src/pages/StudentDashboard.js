@@ -28,15 +28,19 @@ const StudentDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [teacherRes, entriesRes, assignmentsRes] = await Promise.all([
+      const [teacherRes, entriesRes, assignmentsRes, resourcesRes, scheduleRes] = await Promise.all([
         api.get('/student/my-teacher'),
         api.get('/student/my-question-entries'),
-        api.get('/student/my-assignments')
+        api.get('/student/my-assignments'),
+        api.get('/student/my-resource-tracking'),
+        api.get('/student/my-study-schedule')
       ]);
       
       setTeacher(teacherRes.data);
       setQuestionEntries(entriesRes.data);
       setAssignments(assignmentsRes.data);
+      setResources(resourcesRes.data);
+      setSchedule(scheduleRes.data);
     } catch (error) {
       toast.error('Veri yüklenirken hata oluştu');
     } finally {
