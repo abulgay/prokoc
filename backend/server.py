@@ -812,6 +812,207 @@ async def mark_notification_read(notification_id: str, payload: dict = Depends(v
     
     return {"message": "Notification marked as read"}
 
+# Admin Subject/Topic Management
+@api_router.post("/admin/subjects")
+async def create_subject(subject_data: SubjectCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    subject = Subject(name=subject_data.name, exam_type=subject_data.exam_type)
+    subject_dict = subject.model_dump()
+    subject_dict['created_at'] = subject_dict['created_at'].isoformat()
+    await db.subjects.insert_one(subject_dict)
+    return subject
+
+@api_router.get("/admin/subjects")
+async def get_subjects(payload: dict = Depends(verify_token)):
+    subjects = await db.subjects.find({}, {"_id": 0}).to_list(1000)
+    return subjects
+
+@api_router.post("/admin/topics")
+async def create_topic(topic_data: TopicCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    topic = Topic(subject_id=topic_data.subject_id, name=topic_data.name)
+    topic_dict = topic.model_dump()
+    topic_dict['created_at'] = topic_dict['created_at'].isoformat()
+    await db.topics.insert_one(topic_dict)
+    return topic
+
+@api_router.get("/admin/topics/{subject_id}")
+async def get_topics_by_subject(subject_id: str, payload: dict = Depends(verify_token)):
+    topics = await db.topics.find({"subject_id": subject_id}, {"_id": 0}).to_list(1000)
+    return topics
+
+# Teacher Weekly Schedule
+@api_router.post("/teacher/weekly-schedule")
+async def create_weekly_schedule(schedule_data: WeeklyScheduleCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    schedule = WeeklySchedule(
+        student_id=schedule_data.student_id,
+        teacher_id=payload['user_id'],
+        week_start_date=schedule_data.week_start_date,
+        week_end_date=schedule_data.week_start_date + timedelta(days=6),
+        schedule_items=schedule_data.schedule_items
+    )
+    
+    schedule_dict = schedule.model_dump()
+    schedule_dict['week_start_date'] = schedule_dict['week_start_date'].isoformat()
+    schedule_dict['week_end_date'] = schedule_dict['week_end_date'].isoformat()
+    schedule_dict['created_at'] = schedule_dict['created_at'].isoformat()
+    await db.weekly_schedules.insert_one(schedule_dict)
+    
+    return {"message": "Weekly schedule created successfully"}
+
+@api_router.get("/teacher/weekly-schedules/{student_id}")
+async def get_student_weekly_schedules(student_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    schedules = await db.weekly_schedules.find(
+        {"student_id": student_id, "teacher_id": payload['user_id']},
+        {"_id": 0}
+    ).sort("week_start_date", -1).to_list(1000)
+    return schedules
+
+@api_router.get("/teacher/suggested-schedule/{student_id}")
+async def get_suggested_schedule(student_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    entries = await db.question_entries.find({"student_id": student_id}, {"_id": 0}).to_list(1000)
+    
+    subject_performance = {}
+    for entry in entries:
+        subject = entry['subject']
+        if subject not in subject_performance:
+            subject_performance[subject] = {'correct': 0, 'wrong': 0, 'net': 0, 'count': 0}
+        subject_performance[subject]['correct'] += entry['correct_answers']
+        subject_performance[subject]['wrong'] += entry['wrong_answers']
+        subject_performance[subject]['net'] += entry['net_score']
+        subject_performance[subject]['count'] += 1
+    
+    suggested_items = []
+    day = 1
+    for subject, perf in sorted(subject_performance.items(), key=lambda x: x[1]['net'] / x[1]['count'] if x[1]['count'] > 0 else 0):
+        avg_net = perf['net'] / perf['count'] if perf['count'] > 0 else 0
+        
+        if avg_net < 20:
+            duration = 3
+        elif avg_net < 30:
+            duration = 2
+        else:
+            duration = 1
+        
+        start_hour = 9 + (day - 1) * 3
+        suggested_items.append({
+            'day': day,
+            'start_time': f"{start_hour:02d}:00",
+            'end_time': f"{start_hour + duration:02d}:00",
+            'subject': subject,
+            'topic': 'Zayıf Konular',
+            'resource': 'Önerilen Kaynak',
+            'activity_type': 'study',
+            'notes': f'Ortalama net: {avg_net:.2f} - İyileştirme gerekiyor'
+        })
+        day += 1
+        if day > 7:
+            break
+    
+    return {
+        "suggested_items": suggested_items,
+        "analysis": subject_performance
+    }
+
+# Teacher Resource with Topics
+@api_router.post("/teacher/resource-with-topics")
+async def create_resource_with_topics(resource_data: ResourceWithTopicsCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    resource = ResourceWithTopics(
+        student_id=resource_data.student_id,
+        teacher_id=payload['user_id'],
+        resource_name=resource_data.resource_name,
+        subject=resource_data.subject,
+        topics=resource_data.topics
+    )
+    
+    resource_dict = resource.model_dump()
+    resource_dict['created_at'] = resource_dict['created_at'].isoformat()
+    await db.resources_with_topics.insert_one(resource_dict)
+    
+    return {"message": "Resource created successfully"}
+
+@api_router.get("/teacher/resources-with-topics/{student_id}")
+async def get_student_resources_with_topics(student_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    resources = await db.resources_with_topics.find(
+        {"student_id": student_id, "teacher_id": payload['user_id']},
+        {"_id": 0}
+    ).to_list(1000)
+    return resources
+
+@api_router.put("/teacher/resource-topic-status/{resource_id}")
+async def update_resource_topic_status(resource_id: str, topic_name: str, status: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.TEACHER.value:
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    resource = await db.resources_with_topics.find_one({"id": resource_id}, {"_id": 0})
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    
+    for topic in resource['topics']:
+        if topic['name'] == topic_name:
+            topic['status'] = status
+            break
+    
+    await db.resources_with_topics.update_one(
+        {"id": resource_id},
+        {"$set": {"topics": resource['topics']}}
+    )
+    
+    return {"message": "Topic status updated"}
+
+# Student Weekly Schedules
+@api_router.get("/student/my-weekly-schedules")
+async def get_my_weekly_schedules(payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.STUDENT.value:
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    schedules = await db.weekly_schedules.find(
+        {"student_id": payload['user_id']},
+        {"_id": 0}
+    ).sort("week_start_date", -1).to_list(1000)
+    return schedules
+
+@api_router.get("/student/my-resources-with-topics")
+async def get_my_resources_with_topics(payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.STUDENT.value:
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    resources = await db.resources_with_topics.find(
+        {"student_id": payload['user_id']},
+        {"_id": 0}
+    ).to_list(1000)
+    return resources
+
+# Shared Subjects/Topics
+@api_router.get("/subjects")
+async def get_all_subjects(payload: dict = Depends(verify_token)):
+    subjects = await db.subjects.find({}, {"_id": 0}).to_list(1000)
+    return subjects
+
+@api_router.get("/topics/{subject_id}")
+async def get_all_topics_by_subject(subject_id: str, payload: dict = Depends(verify_token)):
+    topics = await db.topics.find({"subject_id": subject_id}, {"_id": 0}).to_list(1000)
+    return topics
+
 # Include the router in the main app
 app.include_router(api_router)
 
