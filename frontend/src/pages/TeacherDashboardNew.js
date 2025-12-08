@@ -172,6 +172,10 @@ const TeacherDashboardNew = () => {
                 <BookOpen className="w-4 h-4 mr-2" />
                 Soru Girişi
               </TabsTrigger>
+              <TabsTrigger value="exam-analysis" data-testid="tab-exam-analysis">
+                <Plus className="w-4 h-4 mr-2" />
+                Deneme Analizi
+              </TabsTrigger>
               <TabsTrigger value="resources" data-testid="tab-resources">
                 <FileText className="w-4 h-4 mr-2" />
                 Kaynak Takibi
