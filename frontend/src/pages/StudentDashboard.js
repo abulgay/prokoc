@@ -169,6 +169,8 @@ const StudentDashboard = () => {
                 <TabsTrigger value="teacher" data-testid="tab-teacher">Öğretmenim</TabsTrigger>
                 <TabsTrigger value="entries" data-testid="tab-entries">Çözümlerim</TabsTrigger>
                 <TabsTrigger value="assignments" data-testid="tab-assignments">Ödevlerim</TabsTrigger>
+                <TabsTrigger value="resources" data-testid="tab-resources">Kaynaklarım</TabsTrigger>
+                <TabsTrigger value="schedule" data-testid="tab-schedule">Programım</TabsTrigger>
               </TabsList>
 
               <TabsContent value="teacher">
