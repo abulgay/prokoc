@@ -371,6 +371,248 @@ const TeacherDashboard = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="assignments">
+              <Card className="glassmorphism p-6">
+                <h2 className="text-xl font-bold text-slate-50 mb-6">Ödev Oluştur</h2>
+                <form onSubmit={handleAssignmentSubmit} className="space-y-6" data-testid="assignment-form">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Öğrenci Seç</Label>
+                      <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                        <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectValue placeholder="Öğrenci seçin" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-800">
+                          {students.map((student) => (
+                            <SelectItem key={student.id} value={student.id}>
+                              {student.full_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Ders</Label>
+                      <Input
+                        value={assignmentForm.subject}
+                        onChange={(e) => setAssignmentForm({...assignmentForm, subject: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Matematik, Türkçe, vb."
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-slate-300">Ödev Başlığı</Label>
+                      <Input
+                        value={assignmentForm.title}
+                        onChange={(e) => setAssignmentForm({...assignmentForm, title: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Örn: Kareköklü Sayılar Çalışması"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-slate-300">Açıklama</Label>
+                      <Textarea
+                        value={assignmentForm.description}
+                        onChange={(e) => setAssignmentForm({...assignmentForm, description: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        rows={3}
+                        placeholder="Ödev detaylarını yazın..."
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Son Tarih</Label>
+                      <Input
+                        type="datetime-local"
+                        value={assignmentForm.due_date}
+                        onChange={(e) => setAssignmentForm({...assignmentForm, due_date: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 glow-button">
+                    <ClipboardList className="w-5 h-5 mr-2" />
+                    Ödev Oluştur
+                  </Button>
+                </form>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="resources">
+              <Card className="glassmorphism p-6">
+                <h2 className="text-xl font-bold text-slate-50 mb-6">Kaynak Takibi</h2>
+                <form onSubmit={handleResourceSubmit} className="space-y-6" data-testid="resource-form">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Öğrenci Seç</Label>
+                      <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                        <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectValue placeholder="Öğrenci seçin" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-800">
+                          {students.map((student) => (
+                            <SelectItem key={student.id} value={student.id}>
+                              {student.full_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Kaynak Adı</Label>
+                      <Input
+                        value={resourceForm.resource_name}
+                        onChange={(e) => setResourceForm({...resourceForm, resource_name: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Örn: Palme Matematik"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Ders</Label>
+                      <Input
+                        value={resourceForm.subject}
+                        onChange={(e) => setResourceForm({...resourceForm, subject: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Matematik, Fizik, vb."
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Konu</Label>
+                      <Input
+                        value={resourceForm.topic}
+                        onChange={(e) => setResourceForm({...resourceForm, topic: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Örn: İkinci Dereceden Denklemler"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-slate-300">Durum</Label>
+                      <Select value={resourceForm.status} onValueChange={(value) => setResourceForm({...resourceForm, status: value})}>
+                        <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-800">
+                          <SelectItem value="not_started">Başlanmadı</SelectItem>
+                          <SelectItem value="in_progress">Devam Ediyor</SelectItem>
+                          <SelectItem value="completed">Tamamlandı</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 glow-button">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Kaynak Ekle
+                  </Button>
+                </form>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="schedule">
+              <Card className="glassmorphism p-6">
+                <h2 className="text-xl font-bold text-slate-50 mb-6">Haftalık Ders Programı</h2>
+                <form onSubmit={handleScheduleSubmit} className="space-y-6" data-testid="schedule-form">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Öğrenci Seç</Label>
+                      <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                        <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectValue placeholder="Öğrenci seçin" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-800">
+                          {students.map((student) => (
+                            <SelectItem key={student.id} value={student.id}>
+                              {student.full_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Gün</Label>
+                      <Select value={scheduleForm.day_of_week} onValueChange={(value) => setScheduleForm({...scheduleForm, day_of_week: value})}>
+                        <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-800">
+                          {daysOfWeek.map((day) => (
+                            <SelectItem key={day.value} value={day.value}>
+                              {day.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Başlangıç Saati</Label>
+                      <Input
+                        type="time"
+                        value={scheduleForm.start_time}
+                        onChange={(e) => setScheduleForm({...scheduleForm, start_time: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Bitiş Saati</Label>
+                      <Input
+                        type="time"
+                        value={scheduleForm.end_time}
+                        onChange={(e) => setScheduleForm({...scheduleForm, end_time: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Ders</Label>
+                      <Input
+                        value={scheduleForm.subject}
+                        onChange={(e) => setScheduleForm({...scheduleForm, subject: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Matematik, Türkçe, vb."
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Konu</Label>
+                      <Input
+                        value={scheduleForm.topic}
+                        onChange={(e) => setScheduleForm({...scheduleForm, topic: e.target.value})}
+                        className="bg-slate-900 border-slate-800 text-slate-100"
+                        placeholder="Çalışılacak konu"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 glow-button">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Programa Ekle
+                  </Button>
+                </form>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="students">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {students.map((student) => (
