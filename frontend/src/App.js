@@ -54,7 +54,9 @@ function AppRoutes() {
         path="/teacher/*"
         element={
           <ProtectedRoute allowedRoles={['teacher']}>
-            <TeacherDashboard />
+            <StudentSelectionProvider>
+              <TeacherDashboardNew />
+            </StudentSelectionProvider>
           </ProtectedRoute>
         }
       />
