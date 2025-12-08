@@ -39,6 +39,11 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedTeacher, setSelectedTeacher] = useState('');
+  const [subjects, setSubjects] = useState([]);
+  const [newSubject, setNewSubject] = useState({ name: '', exam_type: 'TYT' });
+  const [selectedSubjectForTopic, setSelectedSubjectForTopic] = useState('');
+  const [newTopicName, setNewTopicName] = useState('');
+  const [subjectTopics, setSubjectTopics] = useState({});
 
   useEffect(() => {
     if (user?.role !== 'admin') {
