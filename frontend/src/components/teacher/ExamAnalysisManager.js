@@ -86,11 +86,30 @@ const ExamAnalysisManager = ({ studentId }) => {
 
   const updateSubject = (index, field, value) => {
     const updated = [...newExam.subjects];
+    const subjectName = updated[index].name;
+    const maxQ = maxQuestions[newExam.exam_type]?.[subjectName] || 100;
+    
+    // Validate max questions
+    if (field === 'correct' || field === 'wrong') {
+      const numValue = parseInt(value) || 0;
+      if (numValue > maxQ) {
+        toast.error(`${subjectName} için maksimum ${maxQ} soru girilebilir`);
+        return;
+      }
+    }
+    
     updated[index][field] = value;
     
     if (field === 'correct' || field === 'wrong') {
       const correct = parseInt(updated[index].correct) || 0;
       const wrong = parseInt(updated[index].wrong) || 0;
+      const total = correct + wrong;
+      
+      if (total > maxQ) {
+        toast.error(`Toplam soru sayısı ${maxQ}'ı geçemez`);
+        return;
+      }
+      
       updated[index].net = (correct - wrong / 3).toFixed(2);
     }
     
