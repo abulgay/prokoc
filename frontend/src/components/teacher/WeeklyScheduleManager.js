@@ -362,12 +362,29 @@ const WeeklyScheduleManager = ({ studentId }) => {
         </div>
       </Card>
 
-      {/* Add Item Form */}
+      {/* Add/Edit Items */}
       <Card className="glassmorphism p-6">
-        <h3 className="text-xl font-bold text-slate-50 mb-6">Program Öğesi Ekle</h3>
-        
-        <div className="p-4 rounded-lg border bg-slate-900/50 border-slate-800">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-slate-50">Program Öğesi Ekle</h3>
+          <Button
+            onClick={addScheduleItem}
+            className="bg-green-600 hover:bg-green-500"
+            data-testid="add-schedule-item"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Yeni Öğe Ekle
+          </Button>
+        </div>
+
+        {scheduleItems.length === 0 ? (
+          <div className="text-center py-8 text-slate-400">
+            <p>Henüz program öğesi eklenmedi</p>
+            <p className="text-sm mt-2">Yukarıdaki butona tıklayarak yeni öğe ekleyin</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {scheduleItems.map((item, index) => (
+              <div key={index} className={`p-4 rounded-lg border ${editingIndex === index ? 'bg-indigo-900/20 border-indigo-700' : 'bg-slate-900/50 border-slate-800'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label className="text-slate-300 text-sm">Gün</Label>
