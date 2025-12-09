@@ -75,7 +75,7 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
 
-# Match Model
+# Match Models
 class StudentTeacherMatch(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
