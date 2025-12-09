@@ -133,15 +133,14 @@ const UserManagement = () => {
         goal: formData.goal
       };
       
-      const response = await api.put(`/admin/users/${editingUser.id}`, updateData);
-      
-      // Update local state immediately
-      setUsers(users.map(u => u.id === editingUser.id ? response.data : u));
+      await api.put(`/admin/users/${editingUser.id}`, updateData);
       
       toast.success('Kullanıcı başarıyla güncellendi');
       setShowEditDialog(false);
       setEditingUser(null);
-      fetchUsers();
+      
+      // Refresh user list
+      await fetchUsers();
     } catch (error) {
       toast.error('Kullanıcı güncellenemedi');
     }
