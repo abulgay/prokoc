@@ -246,6 +246,7 @@ async def update_user(user_id: str, user_data: UserUpdate, payload: dict = Depen
         birth_date=updated_user.get('birth_date'),
         phone=updated_user.get('phone'),
         address=updated_user.get('address'),
+        goal=updated_user.get('goal'),
         created_at=datetime.fromisoformat(updated_user['created_at'])
     )
 
