@@ -31,6 +31,11 @@ class User(BaseModel):
     full_name: str
     role: UserRole
     approval_status: ApprovalStatus = ApprovalStatus.PENDING
+    school: Optional[str] = None
+    grade: Optional[str] = None
+    birth_date: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -39,6 +44,11 @@ class UserRegister(BaseModel):
     password: str
     full_name: str
     role: UserRole
+    school: Optional[str] = None
+    grade: Optional[str] = None
+    birth_date: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
