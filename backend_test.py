@@ -381,6 +381,434 @@ class StudentCoachingAPITester:
         
         return success_count > 0
 
+    def test_existing_user_login(self):
+        """Test login with existing test credentials"""
+        print("\n=== Testing Existing User Login ===")
+        
+        # Test admin login
+        success1, response1 = self.run_test(
+            "Existing Admin Login",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "admin@test.com", "password": "admin123"}
+        )
+        if success1 and 'token' in response1:
+            self.admin_token = response1['token']
+        
+        # Test teacher login
+        success2, response2 = self.run_test(
+            "Existing Teacher Login",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "teacher@test.com", "password": "teacher123"}
+        )
+        if success2 and 'token' in response2:
+            self.teacher_token = response2['token']
+        
+        # Test student login
+        success3, response3 = self.run_test(
+            "Existing Student Login",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "student@test.com", "password": "student123"}
+        )
+        if success3 and 'token' in response3:
+            self.student_token = response3['token']
+        
+        return success1 and success2 and success3
+
+    def test_student_resource_progress_bug_fix(self):
+        """Test the CRITICAL bug fix: Student resource progress flow"""
+        print("\n=== CRITICAL TEST: Student Resource Progress Bug Fix ===")
+        
+        if not self.teacher_token or not self.student_token:
+            print("❌ Missing teacher or student tokens")
+            return False
+        
+        # Use the specific student ID mentioned in the review request
+        student_id = "82fc3778-05be-4a25-8233-593978e03c15"
+        
+        print(f"🔍 Testing with student ID: {student_id}")
+        
+        # Step 1: Get existing resources for this student
+        print("\n📋 Step 1: Get existing resources for student")
+        success1, existing_resources = self.run_test(
+            "Get Student Resources (Teacher View)",
+            "GET",
+            f"teacher/resources-with-topics/{student_id}",
+            200,
+            token=self.teacher_token
+        )
+        
+        if not success1:
+            print("❌ Failed to get existing resources")
+            return False
+        
+        print(f"   Found {len(existing_resources)} existing resources")
+        
+        # Step 2: Create a new resource if none exist, or use existing one
+        resource_id = None
+        if existing_resources:
+            resource_id = existing_resources[0]['id']
+            print(f"   Using existing resource: {existing_resources[0]['resource_name']}")
+        else:
+            print("\n📝 Step 2: Creating new resource with topics")
+            success2, response2 = self.run_test(
+                "Create Resource with Topics",
+                "POST",
+                "teacher/resource-with-topics",
+                200,
+                data={
+                    "student_id": student_id,
+                    "resource_name": "Test Matematik Kaynağı",
+                    "subject": "Matematik",
+                    "topics": [
+                        {"name": "Fonksiyonlar", "status": "not_started"},
+                        {"name": "Türev", "status": "not_started"},
+                        {"name": "İntegral", "status": "not_started"}
+                    ]
+                },
+                token=self.teacher_token
+            )
+            
+            if not success2:
+                print("❌ Failed to create resource")
+                return False
+            
+            # Get the created resource
+            success_get, new_resources = self.run_test(
+                "Get Newly Created Resource",
+                "GET",
+                f"teacher/resources-with-topics/{student_id}",
+                200,
+                token=self.teacher_token
+            )
+            
+            if success_get and new_resources:
+                resource_id = new_resources[-1]['id']  # Get the last created resource
+        
+        if not resource_id:
+            print("❌ No resource ID available for testing")
+            return False
+        
+        # Step 3: Update a topic status (THE CRITICAL BUG FIX TEST)
+        print(f"\n🔄 Step 3: Update topic status (CRITICAL BUG FIX)")
+        
+        # Get current resource state
+        success3, current_resources = self.run_test(
+            "Get Current Resource State",
+            "GET",
+            f"teacher/resources-with-topics/{student_id}",
+            200,
+            token=self.teacher_token
+        )
+        
+        if not success3 or not current_resources:
+            print("❌ Failed to get current resource state")
+            return False
+        
+        # Find the resource and a topic to update
+        target_resource = None
+        for resource in current_resources:
+            if resource['id'] == resource_id:
+                target_resource = resource
+                break
+        
+        if not target_resource or not target_resource.get('topics'):
+            print("❌ No topics found in resource")
+            return False
+        
+        # Update the first topic's status
+        topic_to_update = target_resource['topics'][0]['name']
+        old_status = target_resource['topics'][0]['status']
+        new_status = "in_progress" if old_status == "not_started" else "completed"
+        
+        print(f"   Updating topic '{topic_to_update}' from '{old_status}' to '{new_status}'")
+        
+        success4, response4 = self.run_test(
+            "Update Topic Status",
+            "PUT",
+            f"teacher/resource-topic-status/{resource_id}?topic_name={topic_to_update}&status={new_status}",
+            200,
+            token=self.teacher_token
+        )
+        
+        if not success4:
+            print("❌ Failed to update topic status")
+            return False
+        
+        # Step 4: Verify update via teacher endpoint
+        print("\n✅ Step 4: Verify update via teacher endpoint")
+        success5, updated_resources = self.run_test(
+            "Verify Teacher View Updated",
+            "GET",
+            f"teacher/resources-with-topics/{student_id}",
+            200,
+            token=self.teacher_token
+        )
+        
+        if not success5:
+            print("❌ Failed to verify teacher view")
+            return False
+        
+        # Check if the update was successful
+        updated_resource = None
+        for resource in updated_resources:
+            if resource['id'] == resource_id:
+                updated_resource = resource
+                break
+        
+        if not updated_resource:
+            print("❌ Updated resource not found")
+            return False
+        
+        topic_updated = False
+        for topic in updated_resource['topics']:
+            if topic['name'] == topic_to_update and topic['status'] == new_status:
+                topic_updated = True
+                print(f"   ✅ Topic '{topic_to_update}' successfully updated to '{new_status}'")
+                break
+        
+        if not topic_updated:
+            print(f"❌ Topic '{topic_to_update}' was not updated correctly")
+            return False
+        
+        # Step 5: CRITICAL - Verify student sees the updated status
+        print("\n🎯 Step 5: CRITICAL - Verify student sees updated status")
+        success6, student_resources = self.run_test(
+            "Student View Resources (CRITICAL TEST)",
+            "GET",
+            "student/my-resources-with-topics",
+            200,
+            token=self.student_token
+        )
+        
+        if not success6:
+            print("❌ CRITICAL FAILURE: Student cannot access resources")
+            return False
+        
+        # Find the updated resource in student view
+        student_resource = None
+        for resource in student_resources:
+            if resource['id'] == resource_id:
+                student_resource = resource
+                break
+        
+        if not student_resource:
+            print("❌ CRITICAL FAILURE: Student cannot see the updated resource")
+            return False
+        
+        # Check if student sees the updated topic status
+        student_topic_updated = False
+        for topic in student_resource['topics']:
+            if topic['name'] == topic_to_update and topic['status'] == new_status:
+                student_topic_updated = True
+                print(f"   ✅ CRITICAL SUCCESS: Student sees topic '{topic_to_update}' as '{new_status}'")
+                break
+        
+        if not student_topic_updated:
+            print(f"❌ CRITICAL FAILURE: Student does not see updated status for '{topic_to_update}'")
+            print(f"   Expected: {new_status}")
+            for topic in student_resource['topics']:
+                if topic['name'] == topic_to_update:
+                    print(f"   Actual: {topic['status']}")
+                    break
+            return False
+        
+        print("\n🎉 CRITICAL BUG FIX VERIFICATION SUCCESSFUL!")
+        print("   ✅ Teacher can update topic status")
+        print("   ✅ Student immediately sees updated status")
+        print("   ✅ Data consistency maintained between teacher and student views")
+        
+        return True
+
+    def test_admin_core_functions(self):
+        """Test admin core functions as specified in review request"""
+        print("\n=== Testing Admin Core Functions ===")
+        
+        if not self.admin_token:
+            print("❌ No admin token available")
+            return False
+        
+        # Test subjects
+        success1, subjects = self.run_test(
+            "Get Admin Subjects",
+            "GET",
+            "admin/subjects",
+            200,
+            token=self.admin_token
+        )
+        
+        if success1:
+            print(f"   Found {len(subjects)} subjects")
+        
+        # Test students
+        success2, students = self.run_test(
+            "Get Admin Students",
+            "GET",
+            "admin/students",
+            200,
+            token=self.admin_token
+        )
+        
+        if success2:
+            print(f"   Found {len(students)} students")
+        
+        # Test teachers
+        success3, teachers = self.run_test(
+            "Get Admin Teachers",
+            "GET",
+            "admin/teachers",
+            200,
+            token=self.admin_token
+        )
+        
+        if success3:
+            print(f"   Found {len(teachers)} teachers")
+        
+        # Test matches
+        success4, matches = self.run_test(
+            "Get Admin Matches",
+            "GET",
+            "admin/matches",
+            200,
+            token=self.admin_token
+        )
+        
+        if success4:
+            print(f"   Found {len(matches)} student-teacher matches")
+        
+        return success1 and success2 and success3 and success4
+
+    def test_teacher_schedule_management(self):
+        """Test teacher schedule management"""
+        print("\n=== Testing Teacher Schedule Management ===")
+        
+        if not self.teacher_token:
+            print("❌ No teacher token available")
+            return False
+        
+        # Use the specific student ID
+        student_id = "82fc3778-05be-4a25-8233-593978e03c15"
+        
+        # Create a weekly schedule
+        from datetime import datetime, timedelta
+        week_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        success1, response1 = self.run_test(
+            "Create Weekly Schedule",
+            "POST",
+            "teacher/weekly-schedule",
+            200,
+            data={
+                "student_id": student_id,
+                "week_start_date": week_start.isoformat(),
+                "schedule_items": [
+                    {
+                        "day": 1,
+                        "start_time": "09:00",
+                        "end_time": "10:00",
+                        "subject": "Matematik",
+                        "topic": "Fonksiyonlar",
+                        "resource": "Test Kaynağı",
+                        "activity_type": "study",
+                        "notes": "Test çalışma planı"
+                    }
+                ]
+            },
+            token=self.teacher_token
+        )
+        
+        # Get weekly schedules
+        success2, schedules = self.run_test(
+            "Get Weekly Schedules",
+            "GET",
+            f"teacher/weekly-schedules/{student_id}",
+            200,
+            token=self.teacher_token
+        )
+        
+        if success2:
+            print(f"   Found {len(schedules)} weekly schedules")
+        
+        return success1 and success2
+
+    def test_authentication_authorization(self):
+        """Test JWT token generation and role-based access"""
+        print("\n=== Testing Authentication & Authorization ===")
+        
+        # Test JWT token generation for all roles
+        tokens_valid = True
+        
+        if self.admin_token:
+            success1, admin_profile = self.run_test(
+                "Admin Token Validation",
+                "GET",
+                "auth/me",
+                200,
+                token=self.admin_token
+            )
+            if success1 and admin_profile.get('role') == 'admin':
+                print("   ✅ Admin JWT token valid")
+            else:
+                tokens_valid = False
+        
+        if self.teacher_token:
+            success2, teacher_profile = self.run_test(
+                "Teacher Token Validation",
+                "GET",
+                "auth/me",
+                200,
+                token=self.teacher_token
+            )
+            if success2 and teacher_profile.get('role') == 'teacher':
+                print("   ✅ Teacher JWT token valid")
+            else:
+                tokens_valid = False
+        
+        if self.student_token:
+            success3, student_profile = self.run_test(
+                "Student Token Validation",
+                "GET",
+                "auth/me",
+                200,
+                token=self.student_token
+            )
+            if success3 and student_profile.get('role') == 'student':
+                print("   ✅ Student JWT token valid")
+            else:
+                tokens_valid = False
+        
+        # Test role-based access control
+        # Student should NOT be able to access teacher endpoints
+        success4, _ = self.run_test(
+            "Student Access Teacher Endpoint (Should Fail)",
+            "GET",
+            "teacher/students",
+            403,  # Should be forbidden
+            token=self.student_token
+        )
+        
+        if success4:
+            print("   ✅ Role-based access control working (student blocked from teacher endpoint)")
+        
+        # Teacher should NOT be able to access admin endpoints
+        success5, _ = self.run_test(
+            "Teacher Access Admin Endpoint (Should Fail)",
+            "GET",
+            "admin/pending-users",
+            403,  # Should be forbidden
+            token=self.teacher_token
+        )
+        
+        if success5:
+            print("   ✅ Role-based access control working (teacher blocked from admin endpoint)")
+        
+        return tokens_valid and success4 and success5
+
 def main():
     print("🚀 Starting Student Coaching Platform API Tests")
     print("=" * 60)
