@@ -15,7 +15,13 @@ const RegisterPage = () => {
     email: '',
     password: '',
     full_name: '',
-    role: 'student'
+    role: 'student',
+    school: '',
+    grade: '',
+    birth_date: '',
+    phone: '',
+    address: '',
+    goal: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +33,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.full_name, formData.role);
+      await register(formData);
       setSuccess(true);
       toast.success('Kayıt başarılı! Admin onayı bekleniyor.');
       setTimeout(() => navigate('/login'), 3000);
