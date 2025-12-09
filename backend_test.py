@@ -811,13 +811,22 @@ class StudentCoachingAPITester:
 
 def main():
     print("🚀 Starting Student Coaching Platform API Tests")
+    print("🎯 Focus: Recently Fixed Student Resource Progress Bug")
     print("=" * 60)
     
     tester = StudentCoachingAPITester()
     
-    # Test sequence
-    tests = [
-        ("Admin Login", tester.test_admin_login),
+    # Priority test sequence based on review request
+    priority_tests = [
+        ("Existing User Login", tester.test_existing_user_login),
+        ("CRITICAL: Student Resource Progress Bug Fix", tester.test_student_resource_progress_bug_fix),
+        ("Admin Core Functions", tester.test_admin_core_functions),
+        ("Teacher Schedule Management", tester.test_teacher_schedule_management),
+        ("Authentication & Authorization", tester.test_authentication_authorization),
+    ]
+    
+    # Additional comprehensive tests
+    additional_tests = [
         ("User Registration", tester.test_user_registration),
         ("Admin Operations", tester.test_admin_operations),
         ("User Login After Approval", tester.test_user_login_after_approval),
@@ -829,8 +838,28 @@ def main():
     ]
     
     failed_tests = []
+    critical_failed = False
     
-    for test_name, test_func in tests:
+    print("\n🔥 PRIORITY TESTS (Based on Review Request)")
+    print("=" * 60)
+    
+    for test_name, test_func in priority_tests:
+        try:
+            result = test_func()
+            if not result:
+                failed_tests.append(test_name)
+                if "CRITICAL" in test_name:
+                    critical_failed = True
+        except Exception as e:
+            print(f"❌ {test_name} failed with exception: {str(e)}")
+            failed_tests.append(test_name)
+            if "CRITICAL" in test_name:
+                critical_failed = True
+    
+    print("\n📋 ADDITIONAL COMPREHENSIVE TESTS")
+    print("=" * 60)
+    
+    for test_name, test_func in additional_tests:
         try:
             result = test_func()
             if not result:
@@ -843,11 +872,17 @@ def main():
     print("\n" + "=" * 60)
     print(f"📊 Test Results: {tester.tests_passed}/{tester.tests_run} tests passed")
     
+    if critical_failed:
+        print("🚨 CRITICAL FAILURE: Student Resource Progress Bug Fix Failed!")
+        print("   This was the main user-reported issue that needed verification.")
+    
     if failed_tests:
         print(f"❌ Failed test categories: {', '.join(failed_tests)}")
         return 1
     else:
         print("✅ All test categories completed successfully!")
+        if not critical_failed:
+            print("🎉 CRITICAL BUG FIX VERIFIED SUCCESSFULLY!")
         return 0
 
 if __name__ == "__main__":
