@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboardNew from './pages/TeacherDashboardNew';
 import StudentDashboard from './pages/StudentDashboard';
+import ParentDashboard from './pages/ParentDashboard';
 import StatisticsPage from './pages/StatisticsPage';
 import './App.css';
 
