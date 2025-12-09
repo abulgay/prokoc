@@ -252,13 +252,18 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-6">
+        <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="bg-slate-900 border border-slate-800">
+            <TabsTrigger value="users" data-testid="tab-users">Kullanıcı Yönetimi</TabsTrigger>
             <TabsTrigger value="pending" data-testid="tab-pending">Onay Bekleyenler</TabsTrigger>
             <TabsTrigger value="match" data-testid="tab-match">Eşleştirme</TabsTrigger>
             <TabsTrigger value="subjects" data-testid="tab-subjects">Ders/Konu Yönetimi</TabsTrigger>
             <TabsTrigger value="reports" data-testid="tab-reports">Raporlar</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="users">
+            <UserManagement />
+          </TabsContent>
 
           <TabsContent value="pending">
             <Card className="glassmorphism p-6">
