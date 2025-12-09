@@ -168,7 +168,10 @@ const UserManagement = () => {
       grade: user.grade || '',
       birth_date: user.birth_date || '',
       phone: user.phone || '',
-      address: user.address || ''
+      address: user.address || '',
+      goal: user.goal || '',
+      parent_id: '',
+      student_id: ''
     });
     setShowEditDialog(true);
   };
