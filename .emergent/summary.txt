@@ -1,0 +1,169 @@
+<analysis>**original_problem_statement:**
+A user wants to build a student coaching website with three roles: Admin, Teacher, and Student.
+-   **Admin:** Manages users (teachers, students, and new parent role), approves registrations, matches students to teachers, manages course/topic content, views reports, tracks payments, and sends notifications (via OneSignal).
+-   **Teacher:** Manages assigned students, enters their test scores (correct/incorrect, system calculates net), creates weekly study schedules, tracks which resources/topics students complete, and manages trial exam analysis.
+-   **Student:** Views their progress, statistics, assignments, and study schedule.
+-   **Parent:** A new role to view their child's progress.
+-   **Key Features:** A detailed statistics screen for all users, PDF export for reports, Google OAuth for login, and a highly specific UI/UX based on screenshots provided by the user, focusing on a global student selection dropdown for teachers and interactive table-based schedule management.
+
+**User's preferred language**:
+Turkish. The next agent MUST respond in Turkish.
+
+**what currently exists?**
+The project is a full-stack application using FastAPI and React. An initial MVP was built, but it has undergone a significant, partially completed refactor to match the user's detailed requirements and screenshots.
+
+-   **Backend ():** A single large file containing all FastAPI logic. It includes JWT authentication and new models/endpoints for managing Subjects, Topics, Resources, and detailed Schedules. A critical routing bug was recently fixed.
+-   **Frontend:** The UI is being rebuilt. Key new elements include a  with a tabbed interface,  for subject/topic management, and a  for global state.
+-   **Functionality:** The basic structure for the new, professional UI is in place. Admin can add subjects/topics (e.g., TYT Matematik). The teacher dashboard has a new layout. Integration playbooks for Google Auth and OneSignal have been retrieved but not implemented.
+
+**Last working item**:
+-   **Last item agent was working:** The agent acknowledged a user-reported bug and was about to start fixing it. The user reported that in the student's dashboard, the Resources section incorrectly shows Not Started even after the teacher has updated the progress. The agent's stated immediate priority is to fix this bug before implementing any new features from the user's extensive list.
+-   **Status**: NOT STARTED
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both. Use the backend testing agent to verify the API response for student resources is correct. Use the frontend testing agent to ensure the  UI properly displays the status received from the API.
+-   **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+-   **Issue 1 (P0):** Student resource progress is not updating in the UI.
+-   **Issue 2 (P1):** Admin login from the UI may still be broken.
+
+**Issues Detail:**
+-   **Issue 1: Student resource progress bug**
+    -   **Attempted fixes:** None. The agent has only acknowledged the issue.
+    -   **Next debug checklist:**
+        1.  **Backend:** Examine the API endpoint that provides resource data to the student dashboard. Ensure it correctly queries and returns the latest status from the database for the given student.
+        2.  **Frontend ():** Verify that the component calls the correct API endpoint and that the state is updated correctly upon receiving the data. Check for potential stale data or re-fetching issues.
+        3.  **Teacher UI ():** Confirm that when a teacher updates a topic's status, the API call is successful and the database modification is committed.
+    -   **Why fix this issue?**: This is a critical data visibility bug reported by the user, making a core feature unusable for students.
+    -   **Status**: NOT STARTED
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: Both.
+    -   **Blocked on other issue**: None.
+
+-   **Issue 2: Admin login UI issue**
+    -   **Attempted fixes:** The agent found and fixed a missing  component import in .
+    -   **Next debug checklist:**
+        1.  Verify the fix by attempting to log in as the admin user () through the UI.
+        2.  If it fails, check the browser's developer console for any frontend errors.
+        3.  Take a screenshot after a successful login to confirm the admin dashboard loads correctly.
+    -   **Why fix this issue?**: The admin cannot perform critical management tasks without access to the panel.
+    -   **Status**: USER VERIFICATION PENDING
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: Frontend.
+    -   **Blocked on other issue**: None.
+
+**In progress Task List**:
+-   **Task 1: Complete the major feature overhaul (P0)**
+    -   **Where to resume**: After fixing the student resource bug (Issue 1), continue implementing the user's large feature request list. The next logical step is the **User Profile Expansion** (adding more fields to user models and forms) and the **Parent/Guardian role**.
+    -   **What will be achieved with this?**: Transform the application into a professional platform that matches the user's detailed vision and provided mockups.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both. This will require extensive testing by the testing agent upon completion.
+    -   **Blocked on something**: Blocked on resolving Issue 1.
+
+**Upcoming and Future Tasks**
+-   **Upcoming Tasks:**
+    -   **(P0) User Profile & Parent Role:** Add detailed fields (school, grade, etc.) to user profiles. Implement a Parent role with view-only access.
+    -   **(P0) Admin User Management:** Allow admins to add/edit users with the new fields and improve the student-teacher matching UI (cancellation, reassignment).
+    -   **(P1) Teacher Schedule UI Overhaul:**
+        -   Make Topic and Resource dropdowns populated from admin-managed lists.
+        -   Allow inline creation of new resources.
+        -   Add Edit functionality to scheduled items.
+        -   Implement form reset on save and disable past times in the time picker.
+    -   **(P1) Teacher Exam Analysis UI:** Add Correct/Incorrect labels and validate input against max question counts.
+    -   **(P2) Admin Payment Tracking:** Create a new section in the admin panel to manage user payments.
+    -   **(P2) Statistics Page Overhaul:** Implement more detailed analytics as requested.
+    -   **(P3) Google OAuth & OneSignal:** Implement these integrations using the fetched playbooks.
+-   **Future Tasks:**
+    -   PDF export for all reports.
+    -   Support for LGS/KPSS exams.
+    -   AI-powered schedule recommendations.
+
+**Completed work in this session**
+-   **Initial MVP Creation:** Built a functional full-stack app with basic auth and dashboards for Admin, Teacher, and Student roles.
+-   **Major Refactor (In Progress):**
+    -   **Backend:** Added new DB models and API endpoints for Subjects, Topics, Schedules, Resources, and Exam Analysis in .
+    -   **Frontend:** Created a new , , and several new components (, , etc.) to align with the user's new design.
+    -   **Admin Panel:** Added a Subject/Topic Management feature.
+    -   **Bug Fix:** Resolved a critical backend routing issue where new API endpoints were returning 404 errors.
+    -   **Integration Prep:** Fetched playbooks for Google Social Login and OneSignal.
+
+**Earlier issues found/mentioned but not fixed**
+-   All items listed under Upcoming and Future Tasks are features requested by the user that have not been implemented yet.
+
+**Known issue recurrence from previous fork**
+-   None.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Frontend:** React, React Router, Tailwind CSS, Shadcn UI.
+-   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver).
+-   **Database:** MongoDB.
+-   **Authentication:** JWT with role-based access control.
+
+**key DB schema**
+-   : { email, password_hash, role, full_name, approved, profile_data }
+-   : { name, exam_type }
+-   : { name, subject_id }
+-   : { student_id, name, topic_statuses: [{topic_id, status}] }
+-   : { student_id, day, time, details }
+-   : { student_id, exam_name, subject_scores: [...] }
+
+**changes in tech stack**
+-   None.
+
+**All files of reference**
+-   : **CRITICAL FILE.** The monolithic backend. Has been heavily modified and is fragile. All new backend logic resides here.
+-   : The new primary dashboard for teachers.
+-   : Contains admin functions; needs updates for user management and payment tracking.
+-   : Contains the bug related to resource progress display.
+-   : Manages the globally selected student for the teacher view.
+-   : Directory containing all new components for the teacher UI.
+
+**Areas that need refactoring**
+-   : This file is over 1,200 lines and extremely difficult to maintain. It urgently needs to be broken down into smaller modules (e.g., , and separate router files for admin, teacher, etc.) to improve stability and prevent future errors like the routing bug that was previously fixed.
+
+**key api endpoints**
+-   
+-   
+-   
+-   
+
+**Critical Info for New Agent**
+-   **PRIORITY #1:** You must first fix the user-reported bug where student resource progress shows Not Started incorrectly.
+-   The user has provided a very detailed vision with screenshots. Follow this new direction closely. A major refactor is in progress; do not use old components like .
+-   The backend file  is a monolith and very risky to edit. Be extremely careful. Refactoring it into smaller parts is highly recommended.
+-   Playbooks for **Google OAuth** and **OneSignal** are ready for implementation after the current feature set and bugs are handled.
+
+**Last 10 User Messages and any pending user messages**
+1.  **User (Msg 100):** Initial massive feature request with screenshots, triggering the major refactor. (Pending)
+2.  **User (Msg 117):** Please continue.
+3.  **User (Msg 186):** Reports being unable to access the admin panel and asks for fixes and next features. (Partially addressed)
+4.  **User (Msg 229):** Second massive feature request, adding parent roles, payments, Google Auth, OneSignal, and more UI refinements. (Pending)
+5.  **User (Msg 236):** Reports a specific bug: student resource progress is not updating in their view. (Pending - HIGHEST PRIORITY)
+6.  **Agent (Msg 237):** Acknowledged the bug and confirmed it will be the next task.
+
+**Project Health Check:**
+-   **Broken:**
+    -   Student's view of resource progress is not updating correctly.
+-   **Mocked:**
+    -   None.
+
+**3rd Party Integrations**
+-   **Google Social Login:** Playbook obtained. Implementation pending. Requires User API Key.
+-   **OneSignal:** Playbook obtained. Implementation pending. Requires User API Key.
+
+**Testing status**
+-   **Testing agent used after significant changes**: NO. The major refactor was not followed by a full test cycle, which likely led to the current bugs.
+-   **Test files created**: None.
+-   **Known regressions**: The student resource progress bug is a likely regression from the refactor.
+
+**Credentials to test flow:**
+-   **Admin**:  / 
+-   **Teacher**:  /  (Note: The agent created  in manual tests, but this is a reliable default).
+-   **Student**:  /  (Note: The agent created  in manual tests).
+
+**What agent forgot to execute**
+-   The agent did not run the testing agent after the significant refactoring work, missing an opportunity to catch the current bugs before the user did.
+-   The agent has not yet addressed the PDF export feature from the original problem statement.</analysis>
