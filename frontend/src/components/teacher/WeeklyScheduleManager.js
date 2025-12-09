@@ -105,26 +105,8 @@ const WeeklyScheduleManager = ({ studentId }) => {
     }
   };
 
-  const [formItem, setFormItem] = useState({
-    day: 1,
-    start_time: '09:00',
-    end_time: '10:00',
-    subject: '',
-    topic: '',
-    resource: '',
-    activity_type: 'study',
-    notes: ''
-  });
-
   const addScheduleItem = () => {
-    if (!formItem.subject && formItem.activity_type !== 'break' && formItem.activity_type !== 'free') {
-      toast.error('Lütfen ders seçin');
-      return;
-    }
-    
-    setScheduleItems([...scheduleItems, { ...formItem }]);
-    // Reset form
-    setFormItem({
+    setScheduleItems([...scheduleItems, {
       day: 1,
       start_time: '09:00',
       end_time: '10:00',
@@ -133,8 +115,7 @@ const WeeklyScheduleManager = ({ studentId }) => {
       resource: '',
       activity_type: 'study',
       notes: ''
-    });
-    toast.success('Program öğesi tabloya eklendi');
+    }]);
   };
 
   const removeScheduleItem = (index) => {
