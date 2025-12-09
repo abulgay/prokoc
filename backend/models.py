@@ -76,6 +76,7 @@ class UserUpdate(BaseModel):
     birth_date: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    goal: Optional[str] = None
 
 # Match Models
 class StudentTeacherMatch(BaseModel):
