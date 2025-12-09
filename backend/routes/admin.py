@@ -164,7 +164,12 @@ async def get_admin_reports(payload: dict = Depends(verify_token)):
 
 # User Management Endpoints
 @router.post("/users", response_model=UserResponse)
-async def create_user(user_data: UserRegister, payload: dict = Depends(verify_token)):
+async def create_user(
+    user_data: UserRegister, 
+    payload: dict = Depends(verify_token),
+    parent_id: str = None,
+    student_id: str = None
+):
     if payload['role'] != UserRole.ADMIN.value:
         raise HTTPException(status_code=403, detail="Admin access required")
     
