@@ -91,8 +91,8 @@ const UserManagement = () => {
 
     try {
       const params = new URLSearchParams();
-      if (formData.parent_id) params.append('parent_id', formData.parent_id);
-      if (formData.student_id) params.append('student_id', formData.student_id);
+      if (formData.parent_id && formData.parent_id !== 'none') params.append('parent_id', formData.parent_id);
+      if (formData.student_id && formData.student_id !== 'none') params.append('student_id', formData.student_id);
       
       const url = `/admin/users${params.toString() ? '?' + params.toString() : ''}`;
       await api.post(url, formData);
