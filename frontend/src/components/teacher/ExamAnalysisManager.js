@@ -276,50 +276,61 @@ const ExamAnalysisManager = ({ studentId }) => {
                 </Button>
               </div>
 
-              {newExam.subjects.map((subject, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-slate-950 rounded border border-slate-800">
-                  <div className="md:col-span-2">
-                    <Select
-                      value={subject.name}
-                      onValueChange={(value) => updateSubject(index, 'name', value)}
-                    >
-                      <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100 h-9">
-                        <SelectValue placeholder="Ders seçin" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-slate-800">
-                        {filteredSubjects.map((s) => (
-                          <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Input
-                      type="number"
-                      placeholder="Doğru"
-                      value={subject.correct}
-                      onChange={(e) => updateSubject(index, 'correct', e.target.value)}
-                      className="bg-slate-900 border-slate-700 text-slate-100 h-9"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="number"
-                      placeholder="Yanlış"
-                      value={subject.wrong}
-                      onChange={(e) => updateSubject(index, 'wrong', e.target.value)}
-                      className="bg-slate-900 border-slate-700 text-slate-100 h-9"
-                      min="0"
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-indigo-400 font-mono font-bold">
-                      Net: {subject.net}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-end">
-                    <Button
+              {newExam.subjects.map((subject, index) => {
+                const maxQ = maxQuestions[newExam.exam_type]?.[subject.name] || 0;
+                const totalAnswered = (parseInt(subject.correct) || 0) + (parseInt(subject.wrong) || 0);
+                
+                return (
+                  <div key={index} className="p-4 bg-slate-950 rounded border border-slate-800 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+                      <div className="md:col-span-2">
+                        <Label className="text-xs text-slate-400 mb-1">Ders</Label>
+                        <Select
+                          value={subject.name}
+                          onValueChange={(value) => updateSubject(index, 'name', value)}
+                        >
+                          <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100 h-9">
+                            <SelectValue placeholder="Ders seçin" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-900 border-slate-800">
+                            {filteredSubjects.map((s) => (
+                              <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-green-400 mb-1">✓ Doğru</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={subject.correct}
+                          onChange={(e) => updateSubject(index, 'correct', e.target.value)}
+                          className="bg-slate-900 border-slate-700 text-slate-100 h-9"
+                          min="0"
+                          max={maxQ}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-red-400 mb-1">✗ Yanlış</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={subject.wrong}
+                          onChange={(e) => updateSubject(index, 'wrong', e.target.value)}
+                          className="bg-slate-900 border-slate-700 text-slate-100 h-9"
+                          min="0"
+                          max={maxQ}
+                        />
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <span className="text-xs text-slate-400 mb-1">Net</span>
+                        <span className="text-indigo-400 font-mono font-bold text-lg">
+                          {subject.net}
+                        </span>
+                      </div>
+                      <div className="flex items-end justify-end">
+                        <Button
                       onClick={() => removeSubject(index)}
                       variant="ghost"
                       size="sm"
