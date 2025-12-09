@@ -5,7 +5,7 @@ import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Plus, Trash2, Lightbulb, Save, Calendar as CalendarIcon, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, Lightbulb, Save, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Edit2, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const WeeklyScheduleManager = ({ studentId }) => {
@@ -17,6 +17,9 @@ const WeeklyScheduleManager = ({ studentId }) => {
   const [topics, setTopics] = useState({});
   const [suggestedSchedule, setSuggestedSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [newResourceName, setNewResourceName] = useState('');
+  const [showResourceInput, setShowResourceInput] = useState({});
 
   const daysOfWeek = [
     { value: 1, label: 'Pazartesi' },
@@ -44,6 +47,18 @@ const WeeklyScheduleManager = ({ studentId }) => {
     return new Date(d.setDate(diff));
   }
 
+  function isPastTime(dayValue, time) {
+    const now = new Date();
+    const today = now.getDay();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const [hours, minutes] = time.split(':').map(Number);
+    const scheduleTime = hours * 60 + minutes;
+    
+    if (dayValue < today) return true;
+    if (dayValue === today && scheduleTime < currentTime) return true;
+    return false;
+  }
+
   useEffect(() => {
     if (studentId) {
       fetchData();
@@ -58,32 +73,31 @@ const WeeklyScheduleManager = ({ studentId }) => {
         api.get('/subjects'),
         api.get(`/teacher/suggested-schedule/${studentId}`)
       ]);
-
+      
       setSchedules(schedulesRes.data);
       setSubjects(subjectsRes.data);
       setSuggestedSchedule(suggestedRes.data);
 
-      // Load topics for each subject
-      const topicsData = {};
-      for (const subject of subjectsRes.data) {
-        const topicsRes = await api.get(`/topics/${subject.id}`);
-        topicsData[subject.id] = topicsRes.data;
-      }
-      setTopics(topicsData);
-
-      // Find schedule for current week
-      const weekSchedule = schedulesRes.data.find(s => {
-        const scheduleStart = new Date(s.week_start_date);
-        return scheduleStart.toDateString() === weekStart.toDateString();
+      const activeSchedule = schedulesRes.data.find(s => {
+        const start = new Date(s.week_start_date);
+        return start.getTime() === weekStart.getTime();
       });
 
-      if (weekSchedule) {
-        setCurrentSchedule(weekSchedule);
-        setScheduleItems(weekSchedule.schedule_items || []);
+      if (activeSchedule) {
+        setCurrentSchedule(activeSchedule);
+        setScheduleItems(activeSchedule.schedule_items || []);
       } else {
         setCurrentSchedule(null);
         setScheduleItems([]);
       }
+
+      // Fetch topics for each subject
+      const topicsMap = {};
+      for (const subject of subjectsRes.data) {
+        const topicsRes = await api.get(`/topics/${subject.id}`);
+        topicsMap[subject.name] = topicsRes.data;
+      }
+      setTopics(topicsMap);
     } catch (error) {
       toast.error('Veri yüklenirken hata oluştu');
     } finally {
@@ -106,6 +120,7 @@ const WeeklyScheduleManager = ({ studentId }) => {
 
   const removeScheduleItem = (index) => {
     setScheduleItems(scheduleItems.filter((_, i) => i !== index));
+    if (editingIndex === index) setEditingIndex(null);
   };
 
   const updateScheduleItem = (index, field, value) => {
@@ -127,6 +142,8 @@ const WeeklyScheduleManager = ({ studentId }) => {
         schedule_items: scheduleItems
       });
       toast.success('Program kaydedildi');
+      setScheduleItems([]);
+      setEditingIndex(null);
       fetchData();
     } catch (error) {
       toast.error('Program kaydedilemedi');
@@ -156,6 +173,15 @@ const WeeklyScheduleManager = ({ studentId }) => {
     return end;
   };
 
+  const addNewResource = (index) => {
+    if (newResourceName.trim()) {
+      updateScheduleItem(index, 'resource', newResourceName.trim());
+      setNewResourceName('');
+      setShowResourceInput({ ...showResourceInput, [index]: false });
+      toast.success('Kaynak eklendi');
+    }
+  };
+
   if (loading) {
     return (
       <Card className="glassmorphism p-6">
@@ -164,7 +190,6 @@ const WeeklyScheduleManager = ({ studentId }) => {
     );
   }
 
-  // Group items by day for table view
   const itemsByDay = {};
   daysOfWeek.forEach(day => {
     itemsByDay[day.value] = scheduleItems.filter(item => item.day === day.value)
@@ -173,63 +198,48 @@ const WeeklyScheduleManager = ({ studentId }) => {
 
   return (
     <div className="space-y-6">
-      {/* Week Navigation */}
       <Card className="glassmorphism p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <Button
               onClick={() => changeWeek(-1)}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-slate-300"
-              data-testid="prev-week"
+              className="border-slate-700 text-slate-300"
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="text-center">
-              <p className="text-sm text-slate-400 uppercase tracking-wider mb-1">HAFTA</p>
-              <p className="text-lg font-semibold text-slate-50">
+              <h3 className="text-lg font-bold text-slate-50">
                 {formatDate(weekStart)} - {formatDate(getWeekEnd(weekStart))}
-              </p>
+              </h3>
+              <p className="text-xs text-slate-400">Haftalık Program</p>
             </div>
             <Button
               onClick={() => changeWeek(1)}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-slate-300"
-              data-testid="next-week"
+              className="border-slate-700 text-slate-300"
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
-          <div className="flex gap-3">
-            {suggestedSchedule && (
-              <Button
-                onClick={applySuggestedSchedule}
-                variant="outline"
-                className="border-amber-600 text-amber-400 hover:bg-amber-600/10"
-                data-testid="apply-suggested"
-              >
-                <Lightbulb className="w-5 h-5 mr-2" />
-                Önerilen Programı Uygula
-              </Button>
-            )}
+          {suggestedSchedule && suggestedSchedule.suggested_items && (
             <Button
-              onClick={saveSchedule}
-              className="bg-indigo-600 hover:bg-indigo-500 glow-button"
-              data-testid="save-schedule"
+              onClick={applySuggestedSchedule}
+              variant="outline"
+              className="border-amber-600 text-amber-400 hover:bg-amber-600/10"
             >
-              <Save className="w-5 h-5 mr-2" />
-              Programı Kaydet
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Önerilen Programı Uygula
             </Button>
-          </div>
+          )}
         </div>
 
-        {/* Historical Schedules */}
         {schedules.length > 0 && (
-          <div className="mb-6 p-4 bg-slate-900/50 rounded-lg border border-slate-800">
-            <p className="text-sm text-slate-400 mb-2">Geçmiş Programlar:</p>
+          <div className="mt-4">
+            <p className="text-sm text-slate-400 mb-2">Önceki programlar:</p>
             <div className="flex flex-wrap gap-2">
               {schedules.slice(0, 5).map((schedule, idx) => (
                 <Button
@@ -237,6 +247,7 @@ const WeeklyScheduleManager = ({ studentId }) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    setScheduleItems(schedule.schedule_items);
                     setWeekStart(new Date(schedule.week_start_date));
                   }}
                   className="text-xs text-slate-300 hover:text-slate-100"
@@ -264,51 +275,65 @@ const WeeklyScheduleManager = ({ studentId }) => {
                 <th className="text-left py-3 px-4 text-slate-300 font-semibold">Konu</th>
                 <th className="text-left py-3 px-4 text-slate-300 font-semibold">Kaynak</th>
                 <th className="text-left py-3 px-4 text-slate-300 font-semibold">Aktivite</th>
-                <th className="text-center py-3 px-4 text-slate-300 font-semibold w-24">İşlem</th>
+                <th className="text-center py-3 px-4 text-slate-300 font-semibold w-32">İşlem</th>
               </tr>
             </thead>
             <tbody>
               {daysOfWeek.map(day => (
                 <React.Fragment key={day.value}>
                   {itemsByDay[day.value].length > 0 ? (
-                    itemsByDay[day.value].map((item, idx) => (
-                      <tr key={`${day.value}-${idx}`} className="border-b border-slate-800/50 hover:bg-slate-900/30">
-                        {idx === 0 && (
-                          <td rowSpan={itemsByDay[day.value].length} className="py-4 px-4 font-medium text-slate-100 border-r border-slate-800">
-                            {day.label}
+                    itemsByDay[day.value].map((item, idx) => {
+                      const itemIndex = scheduleItems.indexOf(item);
+                      const isPast = isPastTime(day.value, item.start_time);
+                      return (
+                        <tr key={`${day.value}-${idx}`} className={`border-b border-slate-800/50 hover:bg-slate-900/30 ${isPast ? 'opacity-50' : ''}`}>
+                          {idx === 0 && (
+                            <td rowSpan={itemsByDay[day.value].length} className="py-4 px-4 font-medium text-slate-100 border-r border-slate-800">
+                              {day.label}
+                            </td>
+                          )}
+                          <td className="py-3 px-4 text-slate-300 font-mono text-sm">
+                            {item.start_time} - {item.end_time}
                           </td>
-                        )}
-                        <td className="py-3 px-4 text-slate-300 font-mono text-sm">
-                          {item.start_time} - {item.end_time}
-                        </td>
-                        <td className="py-3 px-4 text-slate-100">{item.subject}</td>
-                        <td className="py-3 px-4 text-slate-300 text-sm">{item.topic || '-'}</td>
-                        <td className="py-3 px-4 text-slate-300 text-sm">{item.resource || '-'}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            item.activity_type === 'break' ? 'bg-amber-500/20 text-amber-400' :
-                            item.activity_type === 'free' ? 'bg-slate-500/20 text-slate-400' :
-                            'bg-indigo-500/20 text-indigo-400'
-                          }`}>
-                            {activityTypes.find(t => t.value === item.activity_type)?.label}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeScheduleItem(scheduleItems.indexOf(item))}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
+                          <td className="py-3 px-4 text-slate-100">{item.subject}</td>
+                          <td className="py-3 px-4 text-slate-300 text-sm">{item.topic || '-'}</td>
+                          <td className="py-3 px-4 text-slate-300 text-sm">{item.resource || '-'}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              item.activity_type === 'break' ? 'bg-amber-500/20 text-amber-400' :
+                              item.activity_type === 'free' ? 'bg-slate-500/20 text-slate-400' :
+                              'bg-indigo-500/20 text-indigo-400'
+                            }`}>
+                              {activityTypes.find(t => t.value === item.activity_type)?.label}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingIndex(editingIndex === itemIndex ? null : itemIndex)}
+                                className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeScheduleItem(itemIndex)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr className="border-b border-slate-800/50">
                       <td className="py-4 px-4 font-medium text-slate-100 border-r border-slate-800">{day.label}</td>
-                      <td colSpan={6} className="py-4 px-4 text-center text-slate-500 italic">Boş gün</td>
+                      <td colSpan={6} className="py-4 px-4 text-center text-slate-500 italic">Boş</td>
                     </tr>
                   )}
                 </React.Fragment>
@@ -318,7 +343,7 @@ const WeeklyScheduleManager = ({ studentId }) => {
         </div>
       </Card>
 
-      {/* Add New Items */}
+      {/* Add/Edit Items */}
       <Card className="glassmorphism p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-slate-50">Program Öğesi Ekle</h3>
@@ -340,7 +365,7 @@ const WeeklyScheduleManager = ({ studentId }) => {
         ) : (
           <div className="space-y-4">
             {scheduleItems.map((item, index) => (
-              <div key={index} className="p-4 bg-slate-900/50 rounded-lg border border-slate-800">
+              <div key={index} className={`p-4 rounded-lg border ${editingIndex === index ? 'bg-indigo-900/20 border-indigo-700' : 'bg-slate-900/50 border-slate-800'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label className="text-slate-300 text-sm">Gün</Label>
@@ -406,7 +431,10 @@ const WeeklyScheduleManager = ({ studentId }) => {
                         <Label className="text-slate-300 text-sm">Ders</Label>
                         <Select
                           value={item.subject}
-                          onValueChange={(value) => updateScheduleItem(index, 'subject', value)}
+                          onValueChange={(value) => {
+                            updateScheduleItem(index, 'subject', value);
+                            updateScheduleItem(index, 'topic', '');
+                          }}
                         >
                           <SelectTrigger className="bg-slate-950 border-slate-700 text-slate-100">
                             <SelectValue placeholder="Ders seçin" />
@@ -423,22 +451,61 @@ const WeeklyScheduleManager = ({ studentId }) => {
 
                       <div className="space-y-2">
                         <Label className="text-slate-300 text-sm">Konu</Label>
-                        <Input
+                        <Select
                           value={item.topic}
-                          onChange={(e) => updateScheduleItem(index, 'topic', e.target.value)}
-                          className="bg-slate-950 border-slate-700 text-slate-100"
-                          placeholder="Konu yazın"
-                        />
+                          onValueChange={(value) => updateScheduleItem(index, 'topic', value)}
+                          disabled={!item.subject}
+                        >
+                          <SelectTrigger className="bg-slate-950 border-slate-700 text-slate-100">
+                            <SelectValue placeholder="Konu seçin" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-900 border-slate-800">
+                            {(topics[item.subject] || []).map((topic) => (
+                              <SelectItem key={topic.id} value={topic.name}>
+                                {topic.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-slate-300 text-sm">Kaynak</Label>
-                        <Input
-                          value={item.resource}
-                          onChange={(e) => updateScheduleItem(index, 'resource', e.target.value)}
-                          className="bg-slate-950 border-slate-700 text-slate-100"
-                          placeholder="Kaynak adı"
-                        />
+                        {showResourceInput[index] ? (
+                          <div className="flex gap-2">
+                            <Input
+                              value={newResourceName}
+                              onChange={(e) => setNewResourceName(e.target.value)}
+                              className="bg-slate-950 border-slate-700 text-slate-100"
+                              placeholder="Yeni kaynak adı"
+                              onKeyPress={(e) => e.key === 'Enter' && addNewResource(index)}
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => addNewResource(index)}
+                              className="bg-green-600 hover:bg-green-500"
+                            >
+                              Ekle
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Input
+                              value={item.resource}
+                              onChange={(e) => updateScheduleItem(index, 'resource', e.target.value)}
+                              className="bg-slate-950 border-slate-700 text-slate-100"
+                              placeholder="Kaynak adı"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowResourceInput({ ...showResourceInput, [index]: true })}
+                              className="border-slate-700 text-slate-300 whitespace-nowrap"
+                            >
+                              <PlusCircle className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -467,6 +534,18 @@ const WeeklyScheduleManager = ({ studentId }) => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {scheduleItems.length > 0 && (
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={saveSchedule}
+              className="bg-indigo-600 hover:bg-indigo-500"
+            >
+              <Save className="w-5 h-5 mr-2" />
+              Programı Kaydet
+            </Button>
           </div>
         )}
       </Card>
