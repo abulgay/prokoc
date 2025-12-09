@@ -183,6 +183,7 @@ async def create_user(user_data: UserRegister, payload: dict = Depends(verify_to
         birth_date=user_data.birth_date,
         phone=user_data.phone,
         address=user_data.address,
+        goal=user_data.goal,
         approval_status=ApprovalStatus.APPROVED
     )
     
