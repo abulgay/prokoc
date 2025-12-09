@@ -47,7 +47,10 @@ const UserManagement = () => {
     grade: '',
     birth_date: '',
     phone: '',
-    address: ''
+    address: '',
+    goal: '',
+    parent_id: '',
+    student_id: ''
   });
 
   useEffect(() => {
