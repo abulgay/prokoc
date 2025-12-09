@@ -83,6 +83,14 @@ class StudentTeacherMatch(BaseModel):
     teacher_id: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class ParentStudentRelation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    parent_id: str
+    student_id: str
+    relation_type: str = "parent"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Question Entry Models
 class QuestionEntry(BaseModel):
     model_config = ConfigDict(extra="ignore")
