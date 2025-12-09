@@ -396,6 +396,63 @@ const UserManagement = () => {
                   className="bg-slate-950 border-slate-700 text-slate-100"
                 />
               </div>
+              
+              {/* Student specific fields */}
+              {formData.role === 'student' && (
+                <>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-slate-300">Hedef (Örn: TYT 350 net)</Label>
+                    <Input
+                      value={formData.goal}
+                      onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+                      className="bg-slate-950 border-slate-700 text-slate-100"
+                      placeholder="TYT 350 net, AYT 280 net"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-slate-300">Veli Seçimi</Label>
+                    <Select
+                      value={formData.parent_id}
+                      onValueChange={(value) => setFormData({ ...formData, parent_id: value })}
+                    >
+                      <SelectTrigger className="bg-slate-950 border-slate-700 text-slate-100">
+                        <SelectValue placeholder="Veli seçin (opsiyonel)" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-800">
+                        <SelectItem value="">Seçim yok</SelectItem>
+                        {parents.map((parent) => (
+                          <SelectItem key={parent.id} value={parent.id}>
+                            {parent.full_name} ({parent.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              
+              {/* Parent specific fields */}
+              {formData.role === 'parent' && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-slate-300">Öğrenci Seçimi</Label>
+                  <Select
+                    value={formData.student_id}
+                    onValueChange={(value) => setFormData({ ...formData, student_id: value })}
+                  >
+                    <SelectTrigger className="bg-slate-950 border-slate-700 text-slate-100">
+                      <SelectValue placeholder="Öğrenci seçin (opsiyonel)" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-800">
+                      <SelectItem value="">Seçim yok</SelectItem>
+                      {users.filter(u => u.role === 'student').map((student) => (
+                        <SelectItem key={student.id} value={student.id}>
+                          {student.full_name} ({student.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button
