@@ -161,3 +161,171 @@ async def get_admin_reports(payload: dict = Depends(verify_token)):
         })
     
     return reports
+
+# User Management Endpoints
+@router.post("/users", response_model=UserResponse)
+async def create_user(user_data: UserRegister, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    existing_user = await db.users.find_one({"email": user_data.email}, {"_id": 0})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    hashed_password = pwd_context.hash(user_data.password)
+    user = User(
+        email=user_data.email,
+        password=hashed_password,
+        full_name=user_data.full_name,
+        role=user_data.role,
+        school=user_data.school,
+        grade=user_data.grade,
+        birth_date=user_data.birth_date,
+        phone=user_data.phone,
+        address=user_data.address,
+        approval_status=ApprovalStatus.APPROVED
+    )
+    
+    user_dict = user.model_dump()
+    user_dict['created_at'] = user_dict['created_at'].isoformat()
+    user_dict['updated_at'] = user_dict['updated_at'].isoformat()
+    
+    await db.users.insert_one(user_dict)
+    return UserResponse(**user_dict)
+
+@router.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: str, user_data: UserUpdate, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    update_data = {k: v for k, v in user_data.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data to update")
+    
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": update_data}
+    )
+    if result.modified_count == 0:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+    
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return UserResponse(
+        id=updated_user['id'],
+        email=updated_user['email'],
+        full_name=updated_user['full_name'],
+        role=updated_user['role'],
+        approval_status=updated_user['approval_status'],
+        school=updated_user.get('school'),
+        grade=updated_user.get('grade'),
+        birth_date=updated_user.get('birth_date'),
+        phone=updated_user.get('phone'),
+        address=updated_user.get('address'),
+        created_at=datetime.fromisoformat(updated_user['created_at'])
+    )
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    await db.matches.delete_many({"$or": [{"student_id": user_id}, {"teacher_id": user_id}]})
+    await db.parent_student_relations.delete_many({"$or": [{"parent_id": user_id}, {"student_id": user_id}]})
+    
+    return {"message": "User deleted successfully"}
+
+@router.get("/parents", response_model=List[UserResponse])
+async def get_all_parents(payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    parents = await db.users.find({"role": UserRole.PARENT.value, "approval_status": ApprovalStatus.APPROVED.value}, {"_id": 0}).to_list(1000)
+    return [UserResponse(
+        id=p['id'],
+        email=p['email'],
+        full_name=p['full_name'],
+        role=p['role'],
+        approval_status=p['approval_status'],
+        school=p.get('school'),
+        grade=p.get('grade'),
+        birth_date=p.get('birth_date'),
+        phone=p.get('phone'),
+        address=p.get('address'),
+        created_at=datetime.fromisoformat(p['created_at'])
+    ) for p in parents]
+
+# Parent-Student Relation Endpoints
+@router.post("/parent-student-relation")
+async def create_parent_student_relation(relation_data: ParentStudentRelation, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    parent = await db.users.find_one({"id": relation_data.parent_id, "role": UserRole.PARENT.value}, {"_id": 0})
+    if not parent:
+        raise HTTPException(status_code=404, detail="Parent not found")
+    
+    student = await db.users.find_one({"id": relation_data.student_id, "role": UserRole.STUDENT.value}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    existing = await db.parent_student_relations.find_one({
+        "parent_id": relation_data.parent_id,
+        "student_id": relation_data.student_id
+    }, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Relation already exists")
+    
+    relation_dict = relation_data.model_dump()
+    relation_dict['created_at'] = relation_dict['created_at'].isoformat()
+    await db.parent_student_relations.insert_one(relation_dict)
+    
+    parent_notif = Notification(
+        user_id=relation_data.parent_id,
+        title="Öğrenci İlişkisi Eklendi",
+        message=f"{student['full_name']} ile veli-öğrenci ilişkisi kuruldu.",
+        type="relation"
+    )
+    student_notif = Notification(
+        user_id=relation_data.student_id,
+        title="Veli İlişkisi Eklendi",
+        message=f"{parent['full_name']} veliniz olarak eklendi.",
+        type="relation"
+    )
+    
+    parent_notif_dict = parent_notif.model_dump()
+    parent_notif_dict['created_at'] = parent_notif_dict['created_at'].isoformat()
+    student_notif_dict = student_notif.model_dump()
+    student_notif_dict['created_at'] = student_notif_dict['created_at'].isoformat()
+    
+    await db.notifications.insert_one(parent_notif_dict)
+    await db.notifications.insert_one(student_notif_dict)
+    
+    return {"message": "Relation created successfully"}
+
+@router.get("/parent-student-relations")
+async def get_all_parent_student_relations(payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    relations = await db.parent_student_relations.find({}, {"_id": 0}).to_list(1000)
+    return relations
+
+@router.delete("/parent-student-relation/{relation_id}")
+async def delete_parent_student_relation(relation_id: str, payload: dict = Depends(verify_token)):
+    if payload['role'] != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.parent_student_relations.delete_one({"id": relation_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Relation not found")
+    
+    return {"message": "Relation deleted successfully"}
+
