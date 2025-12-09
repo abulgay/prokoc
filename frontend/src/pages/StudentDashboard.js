@@ -383,26 +383,78 @@ const StudentDashboard = () => {
                   {resources.length === 0 ? (
                     <p className="text-slate-400 text-center py-8">Henüz kaynak kaydı yok</p>
                   ) : (
-                    <div className="space-y-4">
-                      {resources.map((resource, idx) => (
-                        <div key={idx} className="glassmorphism p-6 rounded-lg" data-testid={`resource-${idx}`}>
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h3 className="text-lg font-semibold text-slate-50 mb-1">{resource.resource_name}</h3>
-                              <p className="text-sm text-slate-400">{resource.subject} - {resource.topic}</p>
+                    <div className="space-y-6">
+                      {resources.map((resource, idx) => {
+                        const totalTopics = resource.topics?.length || 0;
+                        const completedTopics = resource.topics?.filter(t => t.status === 'completed').length || 0;
+                        const inProgressTopics = resource.topics?.filter(t => t.status === 'in_progress').length || 0;
+                        const notStartedTopics = resource.topics?.filter(t => t.status === 'not_started').length || 0;
+                        const progressPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+                        return (
+                          <div key={idx} className="glassmorphism p-6 rounded-lg" data-testid={`resource-${idx}`}>
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-slate-50 mb-1">{resource.resource_name}</h3>
+                                <p className="text-sm text-slate-400 mb-2">{resource.subject}</p>
+                                
+                                {/* Progress Bar */}
+                                <div className="mt-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-xs text-slate-400">İlerleme</span>
+                                    <span className="text-xs font-semibold text-indigo-400">{progressPercentage}%</span>
+                                  </div>
+                                  <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                    <div 
+                                      className="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-500"
+                                      style={{ width: `${progressPercentage}%` }}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Stats Summary */}
+                                <div className="flex gap-4 mt-3 text-xs">
+                                  <span className="text-green-400">✓ {completedTopics} Tamamlandı</span>
+                                  <span className="text-amber-400">⟳ {inProgressTopics} Devam Ediyor</span>
+                                  <span className="text-slate-500">○ {notStartedTopics} Başlanmadı</span>
+                                </div>
+                              </div>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              resource.status === 'completed' 
-                                ? 'bg-green-500/20 text-green-400' 
-                                : resource.status === 'in_progress'
-                                ? 'bg-amber-500/20 text-amber-400'
-                                : 'bg-slate-500/20 text-slate-400'
-                            }`}>
-                              {resource.status === 'completed' ? 'Tamamlandı' : resource.status === 'in_progress' ? 'Devam Ediyor' : 'Başlanmadı'}
-                            </span>
+
+                            {/* Topics List */}
+                            {resource.topics && resource.topics.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-slate-800">
+                                <p className="text-xs text-slate-400 mb-3 uppercase tracking-wider">Konular</p>
+                                <div className="space-y-2">
+                                  {resource.topics.map((topic, topicIdx) => (
+                                    <div 
+                                      key={topicIdx} 
+                                      className="flex items-center justify-between p-2 rounded bg-slate-900/30"
+                                      data-testid={`topic-${topicIdx}`}
+                                    >
+                                      <span className="text-sm text-slate-300">{topic.name}</span>
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        topic.status === 'completed' 
+                                          ? 'bg-green-500/20 text-green-400' 
+                                          : topic.status === 'in_progress'
+                                          ? 'bg-amber-500/20 text-amber-400'
+                                          : topic.status === 'skipped'
+                                          ? 'bg-slate-500/20 text-slate-500'
+                                          : 'bg-slate-700/20 text-slate-400'
+                                      }`}>
+                                        {topic.status === 'completed' ? '✓ Tamamlandı' : 
+                                         topic.status === 'in_progress' ? '⟳ Devam Ediyor' : 
+                                         topic.status === 'skipped' ? '⊘ Pas' : 
+                                         '○ Başlanmadı'}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </Card>
