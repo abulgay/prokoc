@@ -50,6 +50,7 @@ class UserRegister(BaseModel):
     birth_date: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    goal: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
