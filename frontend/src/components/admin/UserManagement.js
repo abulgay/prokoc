@@ -547,6 +547,19 @@ const UserManagement = () => {
                   className="bg-slate-950 border-slate-700 text-slate-100"
                 />
               </div>
+              
+              {/* Student specific field */}
+              {formData.role === 'student' && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-slate-300">Hedef (Örn: TYT 350 net)</Label>
+                  <Input
+                    value={formData.goal}
+                    onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+                    className="bg-slate-950 border-slate-700 text-slate-100"
+                    placeholder="TYT 350 net, AYT 280 net"
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button
