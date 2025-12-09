@@ -2,8 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from datetime import datetime, timezone
 from database import db
-from models import UserResponse, UserRole, ApprovalStatus, StudentTeacherMatch, Notification
-from utils import verify_token
+from models import (
+    UserResponse, UserRole, ApprovalStatus, StudentTeacherMatch, 
+    Notification, User, UserRegister, UserUpdate, ParentStudentRelation
+)
+from utils import verify_token, pwd_context
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
