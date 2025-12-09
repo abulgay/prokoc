@@ -60,7 +60,20 @@ class UserResponse(BaseModel):
     full_name: str
     role: UserRole
     approval_status: ApprovalStatus
+    school: Optional[str] = None
+    grade: Optional[str] = None
+    birth_date: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
     created_at: datetime
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    school: Optional[str] = None
+    grade: Optional[str] = None
+    birth_date: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 # Match Model
 class StudentTeacherMatch(BaseModel):
