@@ -419,7 +419,7 @@ const UserManagement = () => {
                         <SelectValue placeholder="Veli seçin (opsiyonel)" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-900 border-slate-800">
-                        <SelectItem value="">Seçim yok</SelectItem>
+                        <SelectItem value="none">Seçim yok</SelectItem>
                         {parents.map((parent) => (
                           <SelectItem key={parent.id} value={parent.id}>
                             {parent.full_name} ({parent.email})
