@@ -162,9 +162,62 @@ const RegisterPage = () => {
                 <SelectContent className="bg-slate-900 border-slate-800">
                   <SelectItem value="student" data-testid="role-student">Öğrenci</SelectItem>
                   <SelectItem value="teacher" data-testid="role-teacher">Öğretmen</SelectItem>
+                  <SelectItem value="parent">Veli</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="school" className="text-slate-300">Okul (opsiyonel)</Label>
+                <Input
+                  id="school"
+                  type="text"
+                  placeholder="Okul adı"
+                  value={formData.school}
+                  onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                  className="bg-slate-900 border-slate-800 focus:border-indigo-500 text-slate-100"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grade" className="text-slate-300">Sınıf (opsiyonel)</Label>
+                <Input
+                  id="grade"
+                  type="text"
+                  placeholder="12. Sınıf"
+                  value={formData.grade}
+                  onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                  className="bg-slate-900 border-slate-800 focus:border-indigo-500 text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-slate-300">Telefon (opsiyonel)</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="0555 123 4567"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="bg-slate-900 border-slate-800 focus:border-indigo-500 text-slate-100"
+              />
+            </div>
+
+            {formData.role === 'student' && (
+              <div className="space-y-2">
+                <Label htmlFor="goal" className="text-slate-300">Hedef (opsiyonel)</Label>
+                <Input
+                  id="goal"
+                  type="text"
+                  placeholder="TYT 400 net, AYT 350 net"
+                  value={formData.goal}
+                  onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+                  className="bg-slate-900 border-slate-800 focus:border-indigo-500 text-slate-100"
+                />
+              </div>
+            )}
 
             <Button
               type="submit"
