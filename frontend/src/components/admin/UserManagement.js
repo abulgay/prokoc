@@ -265,7 +265,7 @@ const UserManagement = () => {
             </TableHeader>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user.id} className="border-slate-800/50">
+                <TableRow key={user.id} className="border-slate-800/50" data-user-id={user.id}>
                   <TableCell className="text-slate-100 font-medium">{user.full_name}</TableCell>
                   <TableCell className="text-slate-300">{user.email}</TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
