@@ -27,6 +27,7 @@ import {
   Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
+import UserManagement from '../components/admin/UserManagement';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
