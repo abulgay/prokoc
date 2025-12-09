@@ -67,6 +67,7 @@ class UserResponse(BaseModel):
     birth_date: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    goal: Optional[str] = None
     created_at: datetime
 
 class UserUpdate(BaseModel):
