@@ -24,6 +24,29 @@ const ExamAnalysisManager = ({ studentId }) => {
     notes: ''
   });
 
+  // Max question counts per subject
+  const maxQuestions = {
+    'TYT': {
+      'Türkçe': 40,
+      'Matematik': 40,
+      'Fen Bilimleri': 20,
+      'Sosyal Bilimler': 20
+    },
+    'AYT': {
+      'Matematik': 40,
+      'Fizik': 14,
+      'Kimya': 13,
+      'Biyoloji': 13,
+      'Edebiyat': 24,
+      'Tarih-1': 10,
+      'Coğrafya-1': 6,
+      'Tarih-2': 11,
+      'Coğrafya-2': 11,
+      'Felsefe': 12,
+      'Din Kültürü': 6
+    }
+  };
+
   useEffect(() => {
     if (studentId) {
       fetchData();
