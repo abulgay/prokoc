@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 import logging
 from config import CORS_ORIGINS
 from database import close_db_connection
-from routes import auth, admin, teacher, student, shared
+from routes import auth, admin, teacher, student, shared, parent
 
 # Create the main app without a prefix
 app = FastAPI()
