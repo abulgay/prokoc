@@ -17,7 +17,12 @@ async def register(user_data: UserRegister):
         email=user_data.email,
         password=hashed_password,
         full_name=user_data.full_name,
-        role=user_data.role
+        role=user_data.role,
+        school=user_data.school,
+        grade=user_data.grade,
+        birth_date=user_data.birth_date,
+        phone=user_data.phone,
+        address=user_data.address
     )
     
     user_dict = user.model_dump()
