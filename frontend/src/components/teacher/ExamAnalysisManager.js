@@ -331,16 +331,33 @@ const ExamAnalysisManager = ({ studentId }) => {
                       </div>
                       <div className="flex items-end justify-end">
                         <Button
-                      onClick={() => removeSubject(index)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-400 hover:text-red-300 h-9"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                          onClick={() => removeSubject(index)}
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-400 hover:text-red-300"
+                          data-testid={`remove-subject-${index}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {subject.name && maxQ > 0 && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500">
+                          Maksimum soru: <span className="text-slate-400 font-medium">{maxQ}</span>
+                        </span>
+                        <span className={`${totalAnswered > maxQ ? 'text-red-400' : 'text-slate-400'}`}>
+                          Cevaplanan: <span className="font-medium">{totalAnswered}/{maxQ}</span>
+                        </span>
+                        <span className="text-slate-400">
+                          Boş: <span className="font-medium">{maxQ - totalAnswered}</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="space-y-2">
