@@ -197,6 +197,21 @@ async def create_user(
     user_dict['updated_at'] = user_dict['updated_at'].isoformat()
     
     await db.users.insert_one(user_dict)
+    
+    # If parent is being created and student_id provided, create relation
+    if user_data.role == UserRole.PARENT and student_id:
+        relation = ParentStudentRelation(parent_id=user.id, student_id=student_id)
+        relation_dict = relation.model_dump()
+        relation_dict['created_at'] = relation_dict['created_at'].isoformat()
+        await db.parent_student_relations.insert_one(relation_dict)
+    
+    # If student is being created and parent_id provided, create relation
+    if user_data.role == UserRole.STUDENT and parent_id:
+        relation = ParentStudentRelation(parent_id=parent_id, student_id=user.id)
+        relation_dict = relation.model_dump()
+        relation_dict['created_at'] = relation_dict['created_at'].isoformat()
+        await db.parent_student_relations.insert_one(relation_dict)
+    
     return UserResponse(**user_dict)
 
 @router.put("/users/{user_id}", response_model=UserResponse)
