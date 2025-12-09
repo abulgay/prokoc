@@ -443,7 +443,7 @@ const UserManagement = () => {
                       <SelectValue placeholder="Öğrenci seçin (opsiyonel)" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-900 border-slate-800">
-                      <SelectItem value="">Seçim yok</SelectItem>
+                      <SelectItem value="none">Seçim yok</SelectItem>
                       {users.filter(u => u.role === 'student').map((student) => (
                         <SelectItem key={student.id} value={student.id}>
                           {student.full_name} ({student.email})
