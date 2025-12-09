@@ -72,9 +72,18 @@ function AppRoutes() {
       />
       
       <Route
+        path="/parent/*"
+        element={
+          <ProtectedRoute allowedRoles={['parent']}>
+            <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
         path="/statistics"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+          <ProtectedRoute allowedRoles={['admin', 'teacher', 'student', 'parent']}>
             <StatisticsPage />
           </ProtectedRoute>
         }
