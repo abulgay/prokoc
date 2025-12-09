@@ -9,6 +9,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
     TEACHER = "teacher"
     STUDENT = "student"
+    PARENT = "parent"
 
 class ApprovalStatus(str, Enum):
     PENDING = "pending"
