@@ -129,7 +129,8 @@ const UserManagement = () => {
         grade: formData.grade,
         birth_date: formData.birth_date,
         phone: formData.phone,
-        address: formData.address
+        address: formData.address,
+        goal: formData.goal
       };
       
       await api.put(`/admin/users/${editingUser.id}`, updateData);
