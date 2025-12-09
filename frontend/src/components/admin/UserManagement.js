@@ -90,7 +90,13 @@ const UserManagement = () => {
     }
 
     try {
-      await api.post('/admin/users', formData);
+      const params = new URLSearchParams();
+      if (formData.parent_id) params.append('parent_id', formData.parent_id);
+      if (formData.student_id) params.append('student_id', formData.student_id);
+      
+      const url = `/admin/users${params.toString() ? '?' + params.toString() : ''}`;
+      await api.post(url, formData);
+      
       toast.success('Kullanıcı başarıyla eklendi');
       setShowAddDialog(false);
       setFormData({
@@ -102,7 +108,10 @@ const UserManagement = () => {
         grade: '',
         birth_date: '',
         phone: '',
-        address: ''
+        address: '',
+        goal: '',
+        parent_id: '',
+        student_id: ''
       });
       fetchUsers();
     } catch (error) {
